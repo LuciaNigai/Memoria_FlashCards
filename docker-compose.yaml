@@ -1,0 +1,104 @@
+services:
+  # PostgreSQL for memoria-auth
+  postgres_auth:
+    image: postgres:16.8
+    container_name: postgres_auth
+    env_file:
+      - .env.auth
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"  # auth DB exposed on localhost:5433
+    networks:
+      - memoria_network
+
+  # PostgreSQL for memoria-data
+  postgres_data:
+    image: postgres:16.8
+    container_name: postgres_data
+    env_file:
+      - .env.data
+    volumes:
+      - postgres_data_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"  # data DB exposed on localhost:5432
+    networks:
+      - memoria_network
+
+  # MongoDB for memoria-training
+  mongo_training:
+    image: mongo:7.0
+    container_name: mongo_training
+    ports:
+      - "27017:27017" 
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - memoria_network
+
+  # API Gateway
+  memoria-gateway:
+    build:
+      context: ./memoria-gateway
+    container_name: memoria-gateway
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env.gateway
+    networks:
+      - memoria_network
+    depends_on:
+      - memoria-auth
+      - memoria-data
+      - memoria-training
+
+  # Auth Service
+  memoria-auth:
+    build:
+      context: ./memoria-auth
+    container_name: memoria-auth
+    env_file:
+      - .env.auth
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - memoria_network
+    depends_on:
+      - postgres_auth
+
+  # Data Service
+  memoria-data:
+    build:
+      context: ./memoria-data
+    container_name: memoria-data
+    env_file:
+      - .env.data
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - memoria_network
+    depends_on:
+      - postgres_data
+
+  # Training Service
+  memoria-training:
+    build:
+      context: ./memoria-training
+    container_name: memoria-training
+    env_file:
+      - .env.training
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    networks:
+      - memoria_network
+    depends_on:
+      - mongo_training
+
+volumes:
+  postgres_auth_data:
+  postgres_data_data:
+  mongo_data:
+
+networks:
+  memoria_network:
+    driver: bridge

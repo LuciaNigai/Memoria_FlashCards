@@ -1,0 +1,1 @@
+org.springframework.boot.env.EnvironmentPostProcessor=com.lucia.memoria_gateway.helper.DotenvPostProcessor

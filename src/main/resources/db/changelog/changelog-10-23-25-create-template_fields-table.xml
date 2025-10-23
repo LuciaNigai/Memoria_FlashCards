@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <!-- create "template_field_type" and "template_fields" tables -->
+    <changeSet id="4" author="lucia">
+
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <not>
+                    <tableExists tableName="template_fields"/>
+                </not>
+                <not>
+                    <tableExists tableName="template_field_options"/>
+                </not>
+            </and>
+        </preConditions>
+
+        <createTable tableName="template_fields">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="template_field_id" type="uuid">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="field_role" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="field_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="template_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="template_fields_order" type="INT"/>
+        </createTable>
+
+        <createTable tableName="template_field_options">
+            <column name="template_field_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="option_value" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint
+                tableName="template_field_options"
+                columnNames="template_field_id, option_value"
+                constraintName="uq_template_field_options"/>
+
+        <addForeignKeyConstraint
+                baseTableName="template_field_options"
+                baseColumnNames="template_field_id"
+                constraintName="fk_template_field_options_template_fields"
+                referencedTableName="template_fields"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableName="template_fields"
+                baseColumnNames="template_id"
+                constraintName="fk_template_fields_templates"
+                referencedTableName="templates"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <rollback>
+            <dropTable tableName="template_field_options"/>
+            <dropTable tableName="template_fields"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

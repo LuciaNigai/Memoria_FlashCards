@@ -1,0 +1,485 @@
+{
+	"info": {
+		"_postman_id": "a47d1184-7544-4262-8c3d-909ad73d6ab2",
+		"name": "memoria-data-local",
+		"description": "Colleciton of requests to check the work of memoria-data locally (for dev profile)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36175734"
+	},
+	"item": [
+		{
+			"name": "Create Deck",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse the JSON response\r",
+							"let response = pm.response.json();\r",
+							"\r",
+							"// Save userId into the environment (adjust the path as needed)\r",
+							"pm.environment.set(\"deckId\", response.deckId);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"custom\",\r\n    \"userId\":\"{{userId}}\",\r\n    \"path\": null\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/api/data/decks",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"data",
+						"decks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Deck",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/api/data/decks/{{deckId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"data",
+						"decks",
+						"{{deckId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Deck",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/api/data/decks/{{deckId}}?force=true",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"data",
+						"decks",
+						"{{deckId}}"
+					],
+					"query": [
+						{
+							"key": "force",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse the JSON response\r",
+							"let response = pm.response.json();\r",
+							"\r",
+							"pm.environment.set(\"userId\", response.userId);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"lucia\",\r\n    \"password\": \"password\",\r\n    \"email\": \"lucia@mail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/api/data/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"data",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get UserById",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8082/api/data/users/{{userId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"data",
+						"users",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get User Decks",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8082/api/data/users/{{userId}}/decks",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"data",
+						"users",
+						"{{userId}}",
+						"decks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create template",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let response = pm.response.json();\r",
+							"\r",
+							"pm.environment.set(\"templateId\", response.templateId)\r",
+							"\r",
+							"let jsonData = pm.response.json();\r",
+							"\r",
+							"if (jsonData.fields && Array.isArray(jsonData.fields)) {\r",
+							"  jsonData.fields.forEach(field => {\r",
+							"    const key = `templateFieldId_${field.name\r",
+							"      .toLowerCase()\r",
+							"      .replace(/\\s+/g, '_')\r",
+							"      .replace(/[^a-z0-9_]/g, '')}`;\r",
+							"      \r",
+							"    const value = field.templateFieldId;\r",
+							"    pm.environment.set(key, value);\r",
+							"  });\r",
+							"} else {\r",
+							"  console.warn(\"No 'fields' array found in response\");\r",
+							"}\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ownerId\": \"{{userId}}\",\r\n    \"name\": \"default\",\r\n    \"fields\": [\r\n        {\r\n            \"name\": \"word\",\r\n            \"fieldRole\": \"FRONT\"\r\n        },\r\n        {\r\n            \"name\": \"translation\",\r\n            \"fieldRole\": \"BACK\"\r\n        }\r\n    ],\r\n    \"includesPartOfSpeech\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/api/data/templates",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"data",
+						"templates"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Template",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8082/api/data/templates/{{templateId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"data",
+						"templates",
+						"{{templateId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get user Templates",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8082/api/data/users/{{userId}}/templates",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"data",
+						"users",
+						"{{userId}}",
+						"templates"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Card",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let response = pm.response.json();\r",
+							"pm.environment.set(\"cardId\", response.cardId);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"deckId\": \"{{deckId}}\",\r\n    \"templateId\": \"{{templateId}}\",\r\n    \"fieldMinimalDTOList\": [\r\n        {\r\n            \"content\": \"billing\",\r\n            \"templateFieldId\": \"{{templateFieldId_word}}\"\r\n        },\r\n        {\r\n            \"content\": \"[billing]\",\r\n            \"templateFieldId\": \"{{templateFieldId_translation}}\"\r\n        },\r\n        {\r\n            \"content\": \"noun\",\r\n            \"templateFieldId\": \"{{templateFieldId_part_of_speech}}\"\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/api/data/cards?false",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"data",
+						"cards"
+					],
+					"query": [
+						{
+							"key": "false",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Card",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/api/data/cards/{{cardId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"data",
+						"cards",
+						"{{cardId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Card",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/api/data/cards/{{cardId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"data",
+						"cards",
+						"{{cardId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get User Deck Tree",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8082/api/data/users/{{userId}}/decks",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"data",
+						"users",
+						"{{userId}}",
+						"decks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Deckwith cards",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8082/api/data/decks/{{deckId}}/cards",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"data",
+						"decks",
+						"{{deckId}}",
+						"cards"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

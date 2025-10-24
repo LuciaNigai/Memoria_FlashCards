@@ -7,7 +7,6 @@ import com.lucia.memoria.dto.local.RenameRequestDTO;
 import com.lucia.memoria.dto.local.ResponseDeckWithCardsDTO;
 import com.lucia.memoria.service.local.CardService;
 import com.lucia.memoria.service.local.DeckService;
-import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,7 +39,8 @@ public class DeckController {
   }
 
   @GetMapping("/{deckId}/cards")
-  public ResponseEntity<ResponseDeckWithCardsDTO> getDeckWithCards(@PathVariable("deckId") UUID deckId) {
+  public ResponseEntity<ResponseDeckWithCardsDTO> getDeckWithCards(
+      @PathVariable("deckId") UUID deckId) {
     return ResponseEntity.ok().body(cardService.getDeckWithCards(deckId));
   }
 
@@ -57,8 +57,8 @@ public class DeckController {
   }
 
   @PatchMapping("/{deckId}")
-  public  ResponseEntity<DeckMinimalDTO> renameDeck(@PathVariable("deckId") UUID deckId, @RequestBody
-      RenameRequestDTO newName) {
+  public ResponseEntity<DeckMinimalDTO> renameDeck(@PathVariable("deckId") UUID deckId, @RequestBody
+  RenameRequestDTO newName) {
     return ResponseEntity.ok().body(deckService.renameDeck(deckId, newName.name()));
   }
 }

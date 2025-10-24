@@ -27,7 +27,6 @@ public class TagService {
 
   private final TagRepository tagRepository;
   private final TagMapper tagMapper;
-  private final CardRepository cardRepository;
   private final UserService userService;
 
   @Transactional

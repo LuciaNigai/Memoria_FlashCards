@@ -26,7 +26,12 @@
             </column>
         </createTable>
 
+        <createIndex tableName="users" indexName="idx_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
         <rollback>
+            <dropIndex tableName="users" indexName="idx_user_id"/>
             <dropTable tableName="users"/>
         </rollback>
 

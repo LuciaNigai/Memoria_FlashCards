@@ -139,20 +139,20 @@ public class CardService {
   }
 
 
-    @Transactional
-    public boolean attachTag(UUID cardId, UUID tagId) {
-        Objects.requireNonNull(cardId, "cardId must not be null");
-        Card card = cardRepository.findByCardId(cardId)
-                .orElseThrow(() -> new NotFoundException("Invalid card ID provided."));
-        Tag tag = tagRepository.findByTagId(tagId)
-                .orElseThrow(() -> new NotFoundException("Invalid tag ID provided."));
+  @Transactional
+  public boolean attachTag(UUID cardId, UUID tagId) {
+    Objects.requireNonNull(cardId, "cardId must not be null");
+    Card card = cardRepository.findByCardId(cardId)
+        .orElseThrow(() -> new NotFoundException("Invalid card ID provided."));
+    Tag tag = tagRepository.findByTagId(tagId)
+        .orElseThrow(() -> new NotFoundException("Invalid tag ID provided."));
 
-        boolean wasAttached = card.attachTag(tag);
-        if (wasAttached) {
-            cardRepository.save(card);
-        }
-        return wasAttached;
+    boolean wasAttached = card.attachTag(tag);
+    if (wasAttached) {
+      cardRepository.save(card);
     }
+    return wasAttached;
+  }
 
   @Transactional
   public void deleteCard(UUID cardId) {
@@ -228,7 +228,8 @@ public class CardService {
     field.setContent(minimalDTO.getContent());
   }
 
-  private void verifyForDuplicateField(FieldMinimalDTO minimalDTO, boolean saveDuplicate, UUID currentCardId) {
+  private void verifyForDuplicateField(FieldMinimalDTO minimalDTO, boolean saveDuplicate,
+      UUID currentCardId) {
     List<UUID> duplicateIds = cardRepository.findCardIdsByFieldContent(minimalDTO.getContent())
         .stream()
         .filter(id -> !id.equals(currentCardId))

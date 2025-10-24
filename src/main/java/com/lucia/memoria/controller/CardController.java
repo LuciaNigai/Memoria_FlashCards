@@ -25,33 +25,38 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/data/cards")
 public class CardController {
 
-    private final CardService cardService;
+  private final CardService cardService;
 
-    @PostMapping
-    public ResponseEntity<CardMinimalDTO> createCard(@RequestBody CardMinimalDTO cardDTO, @RequestParam(name = "saveDuplicate", defaultValue = "false") boolean saveDuplicate) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(cardService.createCard(cardDTO, saveDuplicate));
-    }
+  @PostMapping
+  public ResponseEntity<CardMinimalDTO> createCard(@RequestBody CardMinimalDTO cardDTO,
+      @RequestParam(name = "saveDuplicate", defaultValue = "false") boolean saveDuplicate) {
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(cardService.createCard(cardDTO, saveDuplicate));
+  }
 
-    @PatchMapping
-    public ResponseEntity<CardMinimalDTO> updateCard(@RequestBody CardMinimalDTO cardDTO, @RequestParam(name = "saveDuplicate", defaultValue = "false") boolean saveDuplicate) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(cardService.updateCard(cardDTO, saveDuplicate));
-    }
+  @PatchMapping
+  public ResponseEntity<CardMinimalDTO> updateCard(@RequestBody CardMinimalDTO cardDTO,
+      @RequestParam(name = "saveDuplicate", defaultValue = "false") boolean saveDuplicate) {
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(cardService.updateCard(cardDTO, saveDuplicate));
+  }
 
-    @GetMapping("/{cardId}")
-    public ResponseEntity<CardDTO> getCardById(@PathVariable("cardId") UUID cardId) {
-        return ResponseEntity.ok().body(cardService.getCardById(cardId));
-    }
+  @GetMapping("/{cardId}")
+  public ResponseEntity<CardDTO> getCardById(@PathVariable("cardId") UUID cardId) {
+    return ResponseEntity.ok().body(cardService.getCardById(cardId));
+  }
 
-    @DeleteMapping("/{cardId}")
-    public ResponseEntity<GeneralResponseDTO<Void>> deleteCard(@PathVariable("cardId") UUID cardId) {
-        cardService.deleteCard(cardId);
-        return ResponseEntity.ok().body(new GeneralResponseDTO<>("Card deleted successfully."));
-    }
+  @DeleteMapping("/{cardId}")
+  public ResponseEntity<GeneralResponseDTO<Void>> deleteCard(@PathVariable("cardId") UUID cardId) {
+    cardService.deleteCard(cardId);
+    return ResponseEntity.ok().body(new GeneralResponseDTO<>("Card deleted successfully."));
+  }
 
-    @PatchMapping("/{cardId}/{tagId}")
-    public ResponseEntity<GeneralResponseDTO<Void>> attachTag(@PathVariable("cardId") UUID cardId, @PathVariable("tagId") UUID tagId) {
-        boolean wasAttached = cardService.attachTag(cardId, tagId);
-        String response = wasAttached ? "Tag attached successfully." : "Tag already attached";
-        return ResponseEntity.ok().body(new GeneralResponseDTO<>(response));
-    }
+  @PatchMapping("/{cardId}/{tagId}")
+  public ResponseEntity<GeneralResponseDTO<Void>> attachTag(@PathVariable("cardId") UUID cardId,
+      @PathVariable("tagId") UUID tagId) {
+    boolean wasAttached = cardService.attachTag(cardId, tagId);
+    String response = wasAttached ? "Tag attached successfully." : "Tag already attached";
+    return ResponseEntity.ok().body(new GeneralResponseDTO<>(response));
+  }
 }

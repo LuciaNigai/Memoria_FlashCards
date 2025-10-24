@@ -44,7 +44,12 @@
                 columnNames="user_id, name"
                 constraintName="uq_templates_user_name"/>
 
+        <createIndex tableName="templates" indexName="idx_template_id">
+            <column name="template_id"/>
+        </createIndex>
+
         <rollback>
+            <dropIndex tableName="templates" indexName="idx_template_id"/>
             <dropTable tableName="templates"/>
         </rollback>
     </changeSet>

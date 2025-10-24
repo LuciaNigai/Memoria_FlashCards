@@ -42,7 +42,12 @@
                 columnNames="name, user_id"
                 constraintName="uq_name_user"/>
 
+        <createIndex tableName="tags" indexName="idx_tag_id">
+            <column name="tag_id"/>
+        </createIndex>
+
         <rollback>
+            <dropIndex tableName="tags" indexName="idx_tag_id"/>
             <dropTable tableName="tags"/>
         </rollback>
     </changeSet>

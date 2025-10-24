@@ -71,7 +71,12 @@
                 referencedColumnNames="id"
                 onDelete="CASCADE"/>
 
+        <createIndex tableName="template_fields" indexName="idx_template_field_id">
+            <column name="template_field_id"/>
+        </createIndex>
+
         <rollback>
+            <dropIndex tableName="template_fields" indexName="idx_template_field_id"/>
             <dropTable tableName="template_field_options"/>
             <dropTable tableName="template_fields"/>
         </rollback>

@@ -63,4 +63,13 @@ public class Card {
     fields.add(field);
     field.setCard(this);
   }
+
+  public boolean attachTag(Tag tag) {
+      if(tags.contains(tag)) {
+          return false;
+      }
+      tags.add(tag);
+      tag.getCards().add(this);
+      return true;
+  }
 }

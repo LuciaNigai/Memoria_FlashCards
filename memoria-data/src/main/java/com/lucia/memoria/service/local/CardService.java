@@ -15,11 +15,7 @@ import com.lucia.memoria.mapper.CardMapper;
 import com.lucia.memoria.mapper.DeckWithCardsMapper;
 import com.lucia.memoria.mapper.FieldMapper;
 import com.lucia.memoria.mapper.TemplateFieldMapper;
-import com.lucia.memoria.model.Card;
-import com.lucia.memoria.model.Deck;
-import com.lucia.memoria.model.Field;
-import com.lucia.memoria.model.TemplateField;
-import com.lucia.memoria.model.Template;
+import com.lucia.memoria.model.*;
 import com.lucia.memoria.repository.CardRepository;
 import java.util.Collections;
 import java.util.Map;
@@ -29,14 +25,18 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import com.lucia.memoria.repository.TagRepository;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@AllArgsConstructor
 @Slf4j
+@Service
 public class CardService {
 
   private final CardRepository cardRepository;
@@ -47,21 +47,8 @@ public class CardService {
   private final FieldMapper fieldMapper;
   private final TemplateFieldMapper templateFieldMapper;
   private final DeckWithCardsMapper deckWithCardsMapper;
+  private final TagRepository tagRepository;
 
-
-  public CardService(CardRepository cardRepository, DeckService deckService,
-      TemplateService templateService, TemplateFieldService templateFieldService,
-      CardMapper cardMapper, FieldMapper fieldMapper, TemplateFieldMapper templateFieldMapper,
-      DeckWithCardsMapper deckWithCardsMapper) {
-    this.cardRepository = cardRepository;
-    this.deckService = deckService;
-    this.templateService = templateService;
-    this.templateFieldService = templateFieldService;
-    this.cardMapper = cardMapper;
-    this.fieldMapper = fieldMapper;
-    this.templateFieldMapper = templateFieldMapper;
-    this.deckWithCardsMapper = deckWithCardsMapper;
-  }
 
   @Transactional
   public CardMinimalDTO createCard(CardMinimalDTO cardDTO, boolean saveDuplicate) {
@@ -150,6 +137,22 @@ public class CardService {
 
     return deckWithCardsMapper.toDTO(deck, cards);
   }
+
+
+    @Transactional
+    public boolean attachTag(UUID cardId, UUID tagId) {
+        Objects.requireNonNull(cardId, "cardId must not be null");
+        Card card = cardRepository.findByCardId(cardId)
+                .orElseThrow(() -> new NotFoundException("Invalid card ID provided."));
+        Tag tag = tagRepository.findByTagId(tagId)
+                .orElseThrow(() -> new NotFoundException("Invalid tag ID provided."));
+
+        boolean wasAttached = card.attachTag(tag);
+        if (wasAttached) {
+            cardRepository.save(card);
+        }
+        return wasAttached;
+    }
 
   @Transactional
   public void deleteCard(UUID cardId) {

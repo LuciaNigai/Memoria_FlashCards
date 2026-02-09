@@ -1,6 +1,6 @@
 package com.lucia.memoria.controller;
 
-import com.lucia.memoria.dto.local.DeckDTO;
+import com.lucia.memoria.dto.local.DeckResponseDTO;
 import com.lucia.memoria.dto.local.TemplateDTO;
 import com.lucia.memoria.dto.local.UserDTO;
 import com.lucia.memoria.service.local.DeckService;
@@ -74,7 +74,7 @@ public class UserController {
   }
 
   @GetMapping("/{userId}/decks")
-  public ResponseEntity<List<DeckDTO>> getUserDecks(@PathVariable("userId") UUID userId) {
+  public ResponseEntity<List<DeckResponseDTO>> getUserDecks(@PathVariable("userId") UUID userId) {
     return ResponseEntity.ok().body(deckService.getDecksByUserId(userId));
   }
 }

@@ -3,7 +3,7 @@ package com.lucia.memoria.service.external;
 import com.lucia.memoria.dto.externalapi.DefinitionDTO;
 import com.lucia.memoria.dto.externalapi.MeaningDTO;
 import com.lucia.memoria.dto.externalapi.ResponseDTO;
-import com.lucia.memoria.dto.local.CardDTO;
+import com.lucia.memoria.dto.local.CardResponseDTO;
 import com.lucia.memoria.dto.local.FieldDTO;
 import com.lucia.memoria.dto.local.TemplateFieldDTO;
 import com.lucia.memoria.helper.FieldRole;
@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 @AllArgsConstructor
 @Service
@@ -27,7 +26,7 @@ public class FreeDictionaryCardService {
   private final TemplateService templateService;
 
 
-  public List<CardDTO> generateCards(String word) {
+  public List<CardResponseDTO> generateCards(String word) {
     Template template = templateService.getTemplateByName("default");
     List<TemplateField> templateFields = template.getFields();
 
@@ -40,7 +39,7 @@ public class FreeDictionaryCardService {
         .block();
   }
 
-  private List<CardDTO> constructCardDTOs(ResponseDTO resp, Template template,
+  private List<CardResponseDTO> constructCardDTOs(ResponseDTO resp, Template template,
       List<TemplateField> templateFields) {
     List<MeaningDTO> meanings = resp.meanings() != null ? resp.meanings() : Collections.emptyList();
 //    safeguard if the word will contain more options for the same part of speech
@@ -56,7 +55,7 @@ public class FreeDictionaryCardService {
             }
         ));
 
-    List<CardDTO> cards = new ArrayList<>();
+    List<CardResponseDTO> cards = new ArrayList<>();
     for (String partOfSpeech : words.keySet()) {
       List<DefinitionDTO> definitions = words.get(partOfSpeech);
       cards.add(constructCardDTO(resp, template, templateFields, partOfSpeech, definitions));
@@ -64,7 +63,7 @@ public class FreeDictionaryCardService {
     return cards;
   }
 
-  private static CardDTO constructCardDTO(ResponseDTO resp, Template template,
+  private static CardResponseDTO constructCardDTO(ResponseDTO resp, Template template,
       List<TemplateField> templateFields, String partOfSpeech, List<DefinitionDTO> definitionDTOS) {
     List<FieldDTO> cardFields = templateFields.stream().map(fieldTemplate ->
     {
@@ -88,7 +87,7 @@ public class FreeDictionaryCardService {
       throw new IllegalArgumentException("Error formating response");
     }).toList();
 
-    return new CardDTO(null, null, template.getTemplateId(), cardFields);
+    return new CardResponseDTO(null, null, template.getTemplateId(), cardFields);
   }
 
   private static String formatDefinitions(List<DefinitionDTO> definitions) {

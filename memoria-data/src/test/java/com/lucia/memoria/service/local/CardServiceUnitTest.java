@@ -11,8 +11,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.lucia.memoria.dto.local.CardDTO;
-import com.lucia.memoria.dto.local.CardMinimalDTO;
+import com.lucia.memoria.dto.local.CardRequestDTO;
+import com.lucia.memoria.dto.local.CardResponseDTO;
 import com.lucia.memoria.dto.local.FieldDTO;
 import com.lucia.memoria.dto.local.FieldMinimalDTO;
 import com.lucia.memoria.dto.local.TemplateFieldDTO;
@@ -112,20 +112,20 @@ public class CardServiceUnitTest {
     FieldDTO frontFieldDTO = createFieldDTO(frontTemplateDTO);
     FieldDTO backFieldDTO = createFieldDTO(backTemplateDTO);
 
-    CardDTO cardDTO = new CardDTO();
-    cardDTO.setFieldDTOList(List.of(frontFieldDTO, backFieldDTO));
+    CardResponseDTO cardResponseDTO = new CardResponseDTO();
+    cardResponseDTO.setFieldDTOList(List.of(frontFieldDTO, backFieldDTO));
 
     // stubbing
     when(cardRepository.findByCardIdWithFieldsAndFieldTemplates(cardId)).thenReturn(
         Optional.of(card));
-    when(cardMapper.toDTO(card)).thenReturn(cardDTO);
+    when(cardMapper.toDTO(card)).thenReturn(cardResponseDTO);
     when(fieldMapper.toDTO(front)).thenReturn(frontFieldDTO);
     when(fieldMapper.toDTO(back)).thenReturn(backFieldDTO);
     when(templateFieldMapper.toDTO(frontTemplate)).thenReturn(frontTemplateDTO);
     when(templateFieldMapper.toDTO(backTemplate)).thenReturn(backTemplateDTO);
 
     // act
-    CardDTO result = cardService.getCardById(cardId);
+    CardResponseDTO result = cardService.getCardById(cardId);
 
     // assert
     assertNotNull(result);
@@ -164,7 +164,7 @@ public class CardServiceUnitTest {
     when(deckService.getDeckEntityById(any())).thenThrow(new NotFoundException("Deck not found."));
     // act
     Exception exception = assertThrows(NotFoundException.class,
-        () -> cardService.createCard(new CardMinimalDTO(), false));
+        () -> cardService.createCard(new CardRequestDTO(), false));
     // assert
     assertEquals("Deck not found.", exception.getMessage());
   }
@@ -177,7 +177,7 @@ public class CardServiceUnitTest {
     when(deckService.getDeckEntityById(any())).thenReturn(deck);
     when(templateService.getTemplateEntityById(any())).thenThrow(new NotFoundException("Template Not found"));
     //act
-    Exception exception = assertThrows(NotFoundException.class, () -> cardService.createCard(new CardMinimalDTO(), false));
+    Exception exception = assertThrows(NotFoundException.class, () -> cardService.createCard(new CardRequestDTO(), false));
     // assert
     assertEquals("Template Not found", exception.getMessage());
   }
@@ -189,14 +189,15 @@ public class CardServiceUnitTest {
     Template template = new Template();
     TemplateField templateField = new TemplateField();
     template.addField(templateField);
-    CardMinimalDTO cardMinimalDTO = new CardMinimalDTO();
-    cardMinimalDTO.setFieldMinimalDTOList(new ArrayList<>(Arrays.asList(new FieldMinimalDTO(), new FieldMinimalDTO())));
+    CardRequestDTO cardRequestDTO = new CardRequestDTO();
+    cardRequestDTO.setFieldMinimalDTOList(new ArrayList<>(Arrays.asList(new FieldMinimalDTO(), new FieldMinimalDTO())));
     //stub
     when(deckService.getDeckEntityById(any())).thenReturn(deck);
     when(templateService.getTemplateEntityById(any())).thenReturn(template);
     when(templateFieldService.findTemplateFieldById(any())).thenThrow(new IllegalArgumentException("Target template field does not exists"));
 
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> cardService.createCard(cardMinimalDTO, false));
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> cardService.createCard(
+        cardRequestDTO, false));
     assertEquals("Target template field does not exists", exception.getMessage());
   }
 
@@ -209,14 +210,15 @@ public class CardServiceUnitTest {
     templateFieldFront.setTemplateFieldId(UUID.randomUUID());
     template.addField(templateFieldFront);
     template.addField(templateFieldFront);
-    CardMinimalDTO cardMinimalDTO = new CardMinimalDTO();
-    cardMinimalDTO.setFieldMinimalDTOList(new ArrayList<>(Arrays.asList(new FieldMinimalDTO(), new FieldMinimalDTO())));
+    CardRequestDTO cardRequestDTO = new CardRequestDTO();
+    cardRequestDTO.setFieldMinimalDTOList(new ArrayList<>(Arrays.asList(new FieldMinimalDTO(), new FieldMinimalDTO())));
     //stub
     when(deckService.getDeckEntityById(any())).thenReturn(deck);
     when(templateService.getTemplateEntityById(any())).thenReturn(template);
     when(templateFieldService.findTemplateFieldById(any())).thenReturn(templateFieldFront);
     // act
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> cardService.createCard(cardMinimalDTO, false));
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> cardService.createCard(
+        cardRequestDTO, false));
     // assert
     assertEquals("TemplateFieldType must not be null", exception.getMessage());
   }

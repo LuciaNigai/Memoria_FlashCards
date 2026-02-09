@@ -1,7 +1,7 @@
 package com.lucia.memoria.mapper;
 
-import com.lucia.memoria.dto.local.DeckDTO;
-import com.lucia.memoria.dto.local.DeckMinimalDTO;
+import com.lucia.memoria.dto.local.DeckRequestDTO;
+import com.lucia.memoria.dto.local.DeckResponseDTO;
 import com.lucia.memoria.model.Deck;
 import com.lucia.memoria.model.User;
 import org.mapstruct.Mapper;
@@ -14,12 +14,12 @@ import java.util.UUID;
 public interface DeckMapper {
 
   @Mapping(target = "userId", source = "user", qualifiedByName = "userToUserId")
-  DeckDTO toDTO(Deck deck);
+  DeckResponseDTO toDTO(Deck deck);
 
   @Mapping(target = "userId", source = "user", qualifiedByName = "userToUserId")
-  DeckMinimalDTO toMinimalDTO(Deck deck);
+  DeckRequestDTO toMinimalDTO(Deck deck);
 
-  Deck toEntityFromMinimal(DeckMinimalDTO deckMinimalDTO);
+  Deck toEntityFromMinimal(DeckRequestDTO deckRequestDTO);
 
   @Named("userToUserId")
   default UUID mapUserToUserId(User user) {

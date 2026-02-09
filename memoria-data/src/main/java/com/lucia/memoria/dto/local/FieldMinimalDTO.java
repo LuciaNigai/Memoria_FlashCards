@@ -15,5 +15,5 @@ public class FieldMinimalDTO {
 
   private String content;
   @NotNull
-  UUID templateFieldId;
+  private UUID templateFieldId;
 }

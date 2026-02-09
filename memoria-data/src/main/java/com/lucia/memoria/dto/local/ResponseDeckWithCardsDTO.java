@@ -13,6 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 public class ResponseDeckWithCardsDTO {
 
-  private DeckMinimalDTO deck;
-  private List<CardMinimalDTO> cards;
+  private DeckRequestDTO deck;
+  private List<CardRequestDTO> cards;
 }

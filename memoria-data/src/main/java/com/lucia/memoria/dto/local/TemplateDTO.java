@@ -22,10 +22,10 @@ public class TemplateDTO {
   @NotNull
   private UUID ownerId;
   @NotBlank
-  String name;
+  private String name;
   @NotNull
   @Size(min = 2, message = "Template should have at least two fields")
   @Valid
-  List<TemplateFieldDTO> fields;
-  Boolean includesPartOfSpeech;
+  private List<TemplateFieldDTO> fields;
+  private Boolean includesPartOfSpeech;
 }

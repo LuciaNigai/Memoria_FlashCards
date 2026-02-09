@@ -1,7 +1,7 @@
 package com.lucia.memoria.controller;
 
-import com.lucia.memoria.dto.local.DeckDTO;
-import com.lucia.memoria.dto.local.DeckMinimalDTO;
+import com.lucia.memoria.dto.local.DeckRequestDTO;
+import com.lucia.memoria.dto.local.DeckResponseDTO;
 import com.lucia.memoria.dto.local.GeneralResponseDTO;
 import com.lucia.memoria.dto.local.RenameRequestDTO;
 import com.lucia.memoria.dto.local.ResponseDeckWithCardsDTO;
@@ -34,18 +34,17 @@ public class DeckController {
   }
 
   @PostMapping
-  public ResponseEntity<DeckDTO> createDeck(@RequestBody DeckMinimalDTO deckMinimalDTO) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(deckService.createDeck(deckMinimalDTO));
+  public ResponseEntity<DeckResponseDTO> createDeck(@RequestBody DeckRequestDTO deckRequestDTO) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(deckService.createDeck(deckRequestDTO));
   }
 
   @GetMapping("/{deckId}/cards")
-  public ResponseEntity<ResponseDeckWithCardsDTO> getDeckWithCards(
-      @PathVariable("deckId") UUID deckId) {
+  public ResponseEntity<ResponseDeckWithCardsDTO> getDeckWithCards(@PathVariable("deckId") UUID deckId) {
     return ResponseEntity.ok().body(cardService.getDeckWithCards(deckId));
   }
 
   @GetMapping("/{deckId}")
-  public ResponseEntity<DeckDTO> getDeckById(@PathVariable("deckId") UUID deckId) {
+  public ResponseEntity<DeckResponseDTO> getDeckById(@PathVariable("deckId") UUID deckId) {
     return ResponseEntity.ok().body(deckService.getDeckById(deckId));
   }
 
@@ -57,8 +56,8 @@ public class DeckController {
   }
 
   @PatchMapping("/{deckId}")
-  public ResponseEntity<DeckMinimalDTO> renameDeck(@PathVariable("deckId") UUID deckId, @RequestBody
-  RenameRequestDTO newName) {
+  public  ResponseEntity<DeckRequestDTO> renameDeck(@PathVariable("deckId") UUID deckId, @RequestBody
+      RenameRequestDTO newName) {
     return ResponseEntity.ok().body(deckService.renameDeck(deckId, newName.name()));
   }
 }

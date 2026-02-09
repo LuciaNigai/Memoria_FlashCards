@@ -19,7 +19,7 @@ public class TemplateFieldDTO {
 
   private UUID templateFieldId;
   @NotBlank
-  String name;
+  private String name;
   @NotNull
   private FieldRole fieldRole;
   private TemplateFieldType templateFieldType;

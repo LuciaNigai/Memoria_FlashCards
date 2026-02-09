@@ -1,7 +1,7 @@
 package com.lucia.memoria.service.local;
 
-import com.lucia.memoria.dto.local.DeckDTO;
-import com.lucia.memoria.dto.local.DeckMinimalDTO;
+import com.lucia.memoria.dto.local.DeckRequestDTO;
+import com.lucia.memoria.dto.local.DeckResponseDTO;
 import com.lucia.memoria.exception.ConflictWithDataException;
 import com.lucia.memoria.exception.NotFoundException;
 import com.lucia.memoria.helper.AccessLevel;
@@ -40,7 +40,7 @@ public class DeckService {
   }
 
   @Transactional
-  public DeckDTO createDeck(DeckMinimalDTO dto) {
+  public DeckResponseDTO createDeck(DeckRequestDTO dto) {
     Deck parent = null;
     String path = dto.getPath();
 
@@ -77,11 +77,11 @@ public class DeckService {
   }
 
   @Transactional(readOnly = true)
-  public List<DeckDTO> getDecksByUserId(UUID userId) {
+  public List<DeckResponseDTO> getDecksByUserId(UUID userId) {
     User user = userService.getUserEntityById(userId);
 
     List<Deck> allDecks = deckRepository.findAllByUser(user);
-    Map<String, DeckDTO> map = new LinkedHashMap<>();
+    Map<String, DeckResponseDTO> map = new LinkedHashMap<>();
 
     for (Deck deck : allDecks) {
       String path = deck.getPath();
@@ -89,18 +89,18 @@ public class DeckService {
         log.warn("Deck with null path found: {}", deck.getDeckId());
         continue;
       }
-      DeckDTO dto = deckMapper.toDTO(deck);
+      DeckResponseDTO dto = deckMapper.toDTO(deck);
       dto.setChildDecks(new ArrayList<>());
       map.put(path, dto);
     }
 
-    List<DeckDTO> roots = new ArrayList<>();
+    List<DeckResponseDTO> roots = new ArrayList<>();
 
     return constructDeckTree(allDecks, map, roots);
   }
 
   @Transactional(readOnly = true)
-  public DeckDTO getDeckById(UUID deckID) {
+  public DeckResponseDTO getDeckById(UUID deckID) {
     return deckMapper.toDTO(getDeckEntityById(deckID));
   }
 
@@ -130,7 +130,7 @@ public class DeckService {
   }
 
   @Transactional
-  public DeckMinimalDTO renameDeck(UUID deckId, String name) {
+  public DeckRequestDTO renameDeck(UUID deckId, String name) {
     Deck deck = deckRepository.findByDeckId(deckId).orElseThrow(
         () -> new NotFoundException("Deck you are trying to update does not exist")
     );
@@ -204,17 +204,17 @@ public class DeckService {
     }
   }
 
-  private static List<DeckDTO> constructDeckTree(List<Deck> allDecks, Map<String, DeckDTO> map,
-      List<DeckDTO> roots) {
+  private static List<DeckResponseDTO> constructDeckTree(List<Deck> allDecks, Map<String, DeckResponseDTO> map,
+      List<DeckResponseDTO> roots) {
     for (Deck deck : allDecks) {
       String path = deck.getPath();
-      DeckDTO currentDTO = map.get(path);
+      DeckResponseDTO currentDTO = map.get(path);
       Deck parentDeck = deck.getParentDeck();
 
       if (parentDeck == null || parentDeck.getPath() == null) {
         roots.add(currentDTO);
       } else {
-        DeckDTO parentDTO = map.get(parentDeck.getPath());
+        DeckResponseDTO parentDTO = map.get(parentDeck.getPath());
         if (parentDTO != null) {
           parentDTO.getChildDecks().add(currentDTO);
         } else {

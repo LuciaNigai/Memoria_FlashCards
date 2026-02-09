@@ -1,7 +1,7 @@
 package com.lucia.memoria.controller;
 
-import com.lucia.memoria.dto.local.CardDTO;
-import com.lucia.memoria.dto.local.CardMinimalDTO;
+import com.lucia.memoria.dto.local.CardRequestDTO;
+import com.lucia.memoria.dto.local.CardResponseDTO;
 import com.lucia.memoria.dto.local.GeneralResponseDTO;
 import com.lucia.memoria.service.local.CardService;
 import java.util.UUID;
@@ -28,16 +28,16 @@ public class CardController {
   }
 
   @PostMapping
-  public ResponseEntity<CardMinimalDTO> createCard(@RequestBody CardMinimalDTO cardDTO, @RequestParam(name = "saveDuplicate", defaultValue = "false") boolean saveDuplicate) {
+  public ResponseEntity<CardRequestDTO> createCard(@RequestBody CardRequestDTO cardDTO, @RequestParam(name = "saveDuplicate", defaultValue = "false") boolean saveDuplicate) {
     return ResponseEntity.status(HttpStatus.CREATED).body(cardService.createCard(cardDTO, saveDuplicate));
   }
 
-  @PatchMapping
-  public ResponseEntity<CardMinimalDTO> updateCard(@RequestBody CardMinimalDTO cardDTO, @RequestParam(name = "saveDuplicate", defaultValue = "false") boolean saveDuplicate) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(cardService.updateCard(cardDTO, saveDuplicate));
+  @PatchMapping("/{cardId}")
+  public ResponseEntity<CardRequestDTO> updateCard(@PathVariable("cardId") UUID cardId, @RequestBody CardRequestDTO cardDTO, @RequestParam(name = "saveDuplicate", defaultValue = "false") boolean saveDuplicate) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(cardService.updateCard(cardId, cardDTO, saveDuplicate));
   }
   @GetMapping("/{cardId}")
-  public ResponseEntity<CardDTO> getCardById(@PathVariable("cardId") UUID cardId) {
+  public ResponseEntity<CardResponseDTO> getCardById(@PathVariable("cardId") UUID cardId) {
     return ResponseEntity.ok().body(cardService.getCardById(cardId));
   }
 

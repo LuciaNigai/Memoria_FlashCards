@@ -17,9 +17,9 @@ public class FieldDTO {
 
   @NotNull
   @Valid
-  TemplateFieldDTO fieldTemplate;
+  private TemplateFieldDTO fieldTemplate;
   private UUID fieldId;
-  String content;
+  private String content;
 
   public static FieldDTO blankWithTemplate(TemplateFieldDTO templateFieldDTO) {
     FieldDTO dto = new FieldDTO();

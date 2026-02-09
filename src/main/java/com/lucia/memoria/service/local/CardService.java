@@ -1,16 +1,10 @@
 package com.lucia.memoria.service.local;
 
-import com.lucia.memoria.dto.local.CardDTO;
-import com.lucia.memoria.dto.local.CardMinimalDTO;
+import com.lucia.memoria.dto.local.CardResponseDTO;
+import com.lucia.memoria.dto.local.CardRequestDTO;
 import com.lucia.memoria.dto.local.FieldDTO;
-import com.lucia.memoria.dto.local.FieldMinimalDTO;
 import com.lucia.memoria.dto.local.ResponseDeckWithCardsDTO;
-import com.lucia.memoria.exception.ConflictWithDataException;
-import com.lucia.memoria.exception.DuplicateException;
 import com.lucia.memoria.exception.NotFoundException;
-import com.lucia.memoria.helper.FieldRole;
-import com.lucia.memoria.helper.FieldType;
-import com.lucia.memoria.helper.TemplateFieldType;
 import com.lucia.memoria.mapper.CardMapper;
 import com.lucia.memoria.mapper.DeckWithCardsMapper;
 import com.lucia.memoria.mapper.FieldMapper;
@@ -21,14 +15,14 @@ import com.lucia.memoria.model.Field;
 import com.lucia.memoria.model.TemplateField;
 import com.lucia.memoria.model.Template;
 import com.lucia.memoria.repository.CardRepository;
+import com.lucia.memoria.service.helper.CardValidator;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -37,110 +31,89 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class CardService {
 
   private final CardRepository cardRepository;
   private final DeckService deckService;
   private final TemplateService templateService;
-  private final TemplateFieldService templateFieldService;
   private final CardMapper cardMapper;
   private final FieldMapper fieldMapper;
   private final TemplateFieldMapper templateFieldMapper;
   private final DeckWithCardsMapper deckWithCardsMapper;
+  private final CardValidator cardValidator;
 
-
-  public CardService(CardRepository cardRepository, DeckService deckService,
-      TemplateService templateService, TemplateFieldService templateFieldService,
-      CardMapper cardMapper, FieldMapper fieldMapper, TemplateFieldMapper templateFieldMapper,
-      DeckWithCardsMapper deckWithCardsMapper) {
-    this.cardRepository = cardRepository;
-    this.deckService = deckService;
-    this.templateService = templateService;
-    this.templateFieldService = templateFieldService;
-    this.cardMapper = cardMapper;
-    this.fieldMapper = fieldMapper;
-    this.templateFieldMapper = templateFieldMapper;
-    this.deckWithCardsMapper = deckWithCardsMapper;
-  }
 
   @Transactional
-  public CardMinimalDTO createCard(CardMinimalDTO cardDTO, boolean saveDuplicate) {
+  public CardRequestDTO createCard(CardRequestDTO cardDTO, boolean saveDuplicate) {
+    // 1. Fetch relevant data
     Deck deck = deckService.getDeckEntityById(cardDTO.getDeckId());
     Template template = templateService.getTemplateEntityById(cardDTO.getTemplateId());
 
-    Card card = new Card();
-    card.setCardId(UUID.randomUUID());
-    card.setTemplate(template);
+    // 2. Create the new card object
+    Card card = new Card(deck, template);
 
-    Optional.ofNullable(cardDTO.getFieldMinimalDTOList())
+    // 3. Process fields
+    Map<UUID, TemplateField> templateFields = template.getFields().stream()
+        .collect(Collectors.toMap(TemplateField::getTemplateFieldId, Function.identity()));
+
+    Optional.ofNullable(cardDTO.getFieldRequestDTOList())
         .orElse(Collections.emptyList())
-        .forEach(minimalDTO -> addCardField(saveDuplicate, minimalDTO, card));
+        .forEach(dto -> {
+          cardValidator.validateDuplicates(dto, saveDuplicate, null);
+          TemplateField tf = templateFields.get(dto.getTemplateFieldId());
+          if (tf == null) {
+            throw new NotFoundException("Template field not found for ID: " + dto.getTemplateFieldId());
+          }
 
-    validateCardFields(card);
-    card.setDeck(deck);
+          Field newField = Field.createNew(card, tf, dto.getContent());
+          card.addField(newField);
+        });
 
-    Card savedCard = cardRepository.save(card);
-
-    return cardMapper.toMinimalDTO(savedCard);
+    // 4. Validation & Save
+    cardValidator.validateCardStructure(card);
+    return cardMapper.toMinimalDTO(cardRepository.save(card));
   }
 
   @Transactional
-  public CardMinimalDTO updateCard(CardMinimalDTO cardDTO, boolean saveDuplicates) {
-    Card card = cardRepository.findByCardIdWithFieldsAndFieldTemplates(cardDTO.getCardId())
+  public CardRequestDTO updateCard(UUID cardId, CardRequestDTO cardDTO, boolean saveDuplicates) {
+    // 1. Fetch
+    Card card = cardRepository.findByCardIdWithFieldsAndFieldTemplates(cardId)
         .orElseThrow(() -> new NotFoundException("Card not found"));
-    Map<UUID, Field> cardFields = card.getFields().stream()
-        .filter(f -> f.getTemplateField() != null)
-        .collect(Collectors.toMap(
-            f -> f.getTemplateField().getTemplateFieldId(),
-            Function.identity(),
-            (existing, replacement) -> existing // keep first if duplicates
-        ));
+
+    // 2. Prepare context (Getting the valid template fields)
     Map<UUID, TemplateField> templateFields = card.getTemplate().getFields().stream()
         .collect(Collectors.toMap(TemplateField::getTemplateFieldId, Function.identity()));
 
-    cardDTO.getFieldMinimalDTOList()
-        .forEach(minimalDTO -> {
-          UUID templateFieldId = minimalDTO.getTemplateFieldId();
-          Field field = cardFields.get(templateFieldId);
-          verifyForDuplicateField(minimalDTO, saveDuplicates, card.getCardId());
-          if (field != null) {
-            TemplateFieldType templateFieldType = field.getTemplateField().getTemplateFieldType();
-            setCardContent(minimalDTO, templateFieldType, field, saveDuplicates);
-          } else if (templateFields.get(templateFieldId) != null) {
-            TemplateField templateField = templateFields.get(templateFieldId);
-            TemplateFieldType templateFieldType = templateField.getTemplateFieldType();
-            field = new Field();
-            field.setTemplateField(templateField);
-            field.setCard(card);
-            field.setFieldId(UUID.randomUUID());
-            setCardContent(minimalDTO, templateFieldType, field, saveDuplicates);
-            card.getFields().add(field);
-          } else {
-            throw new ConflictWithDataException("Invalid Field templateId",
-                List.of(minimalDTO.getTemplateFieldId()));
-          }
-        });
+    // 3. Cross-cutting concern (Duplicate check)
+    cardDTO.getFieldRequestDTOList().forEach(dto ->
+        cardValidator.validateDuplicates(dto, saveDuplicates, card.getCardId()));
 
-    validateCardFields(card);
-    Card savedCard = cardRepository.save(card);
-    return cardMapper.toMinimalDTO(savedCard);
+    // 4. Delegation (The "tell, don't ask" principle)
+    card.syncFields(cardDTO.getFieldRequestDTOList(), templateFields);
+
+    // 5. Business Rules & save
+    cardValidator.validateCardStructure(card);
+    return cardMapper.toMinimalDTO(cardRepository.save(card));
   }
 
 
   @Transactional(readOnly = true)
-  public CardDTO getCardById(UUID cardId) {
-    Objects.requireNonNull(cardId, "cardId must not be null");
-
+  public CardResponseDTO getCardById(UUID cardId) {
     Card card = cardRepository.findByCardIdWithFieldsAndFieldTemplates(cardId)
         .orElseThrow(() -> new NotFoundException("Invalid card ID provided."));
-    List<TemplateField> templateFields = card.getFields().stream().map(Field::getTemplateField)
-        .toList();
 
-    List<FieldDTO> fields = buildFullFields(card, templateFields);
-    CardDTO cardDTO = cardMapper.toDTO(card);
-    cardDTO.setFieldDTOList(fields);
+    // 1. Map basic info (cardId, deckId, templateId)
+    CardResponseDTO cardResponseDTO = cardMapper.toDTO(card);
 
-    return cardDTO;
+    // 2. Build the "Full" list (Existing fields + Blank fields from template)
+    List<TemplateField> allPossibleFields = card.getTemplate().getFields();
+    List<FieldDTO> fullFields = buildFullFields(card, allPossibleFields);
+
+    // 3. Manually set it
+    cardResponseDTO.setFieldDTOList(fullFields);
+
+    return cardResponseDTO;
   }
 
   @Transactional(readOnly = true)
@@ -159,32 +132,15 @@ public class CardService {
   }
 
   private List<FieldDTO> buildFullFields(Card card, List<TemplateField> templateFields) {
-    Map<UUID, Field> cardFieldsByTemplateId = card.getFields().stream()
-        .collect(
-            Collectors.toMap(f -> f.getTemplateField().getTemplateFieldId(), Function.identity()));
-
     return templateFields.stream()
-        .map(templateField -> convertOrCreateBlankFieldDTO(templateField, cardFieldsByTemplateId))
-        .toList();
-  }
-
-  private void addCardField(boolean saveDuplicate, FieldMinimalDTO minimalDTO, Card card) {
-    TemplateField templateField = templateFieldService.findTemplateFieldById(
-        minimalDTO.getTemplateFieldId());
-
-    Field field = new Field();
-    field.setFieldId(UUID.randomUUID());
-
-    setCardContent(minimalDTO, templateField.getTemplateFieldType(), field, saveDuplicate);
-
-    field.setTemplateField(templateField);
-
-    card.addField(field);
+        .map(templateField -> {
+          Field field = card.getFieldByTemplateId(templateField.getTemplateFieldId()).orElse(null);
+          return convertOrCreateBlankFieldDTO(templateField, field);
+        }).toList();
   }
 
   private FieldDTO convertOrCreateBlankFieldDTO(TemplateField templateField,
-      Map<UUID, Field> cardFieldsByTemplateId) {
-    Field field = cardFieldsByTemplateId.get(templateField.getTemplateFieldId());
+      Field field) {
     return Optional.ofNullable(field)
         .map(f -> {
           FieldDTO fieldDTO = fieldMapper.toDTO(f);
@@ -192,60 +148,5 @@ public class CardService {
           return fieldDTO;
         })
         .orElse(FieldDTO.blankWithTemplate(templateFieldMapper.toDTO(templateField)));
-  }
-
-  private void setCardContent(FieldMinimalDTO minimalDTO,
-      TemplateFieldType templateFieldType,
-      Field field, boolean saveDuplicate) {
-
-    if (templateFieldType == null) {
-      throw new IllegalArgumentException("TemplateFieldType must not be null");
-    }
-
-    FieldType fieldType = templateFieldType.getFieldType();
-
-    verifyForDuplicateField(minimalDTO, saveDuplicate, null);
-    if (fieldType == FieldType.ENUM || fieldType == FieldType.MULTI_TAG) {
-      setEnumTypeFieldContent(minimalDTO, templateFieldType, field);
-      return;
-    }
-
-    field.setContent(minimalDTO.getContent());
-  }
-
-  private static void setEnumTypeFieldContent(FieldMinimalDTO minimalDTO,
-      TemplateFieldType templateFieldType, Field field) {
-    if (templateFieldType.getOptions() == null ||
-        !templateFieldType.getOptions().contains(minimalDTO.getContent())) {
-      throw new IllegalArgumentException(
-          "The option you chose is not valid. Please choose one of: "
-              + templateFieldType.getOptions()
-      );
-    }
-    field.setContent(minimalDTO.getContent());
-  }
-
-  private void verifyForDuplicateField(FieldMinimalDTO minimalDTO, boolean saveDuplicate, UUID currentCardId) {
-    List<UUID> duplicateIds = cardRepository.findCardIdsByFieldContent(minimalDTO.getContent())
-        .stream()
-        .filter(id -> !id.equals(currentCardId))
-        .toList();
-    if (!duplicateIds.isEmpty() && !saveDuplicate) {
-      throw new DuplicateException(
-          "The card with such field " + minimalDTO.getContent()
-              + " already exists. Are you sure you want to save it?",
-          duplicateIds);
-    }
-  }
-
-  private void validateCardFields(Card card) {
-    Set<FieldRole> roles = card.getFields().stream()
-        .map(Field::getTemplateField)
-        .map(TemplateField::getFieldRole)
-        .collect(Collectors.toSet());
-
-    if (!roles.contains(FieldRole.FRONT) || !roles.contains(FieldRole.BACK)) {
-      throw new IllegalArgumentException("Card must have at least one FRONT and one BACK field");
-    }
   }
 }

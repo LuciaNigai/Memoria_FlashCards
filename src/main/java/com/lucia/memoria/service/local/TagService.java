@@ -27,7 +27,6 @@ public class TagService {
 
   private final TagRepository tagRepository;
   private final TagMapper tagMapper;
-  private final CardRepository cardRepository;
   private final UserService userService;
 
   @Transactional
@@ -52,14 +51,16 @@ public class TagService {
 
   @Transactional
   public void deleteTag(UUID tagId, boolean force) {
-    Tag tag = tagRepository.findByTagId(tagId).orElseThrow(() -> new NotFoundException("Tag you are trying to delete does not exist"));
+    Tag tag = tagRepository.findByTagId(tagId)
+        .orElseThrow(() -> new NotFoundException("Tag you are trying to delete does not exist"));
     Set<Card> cards = tag.getCards();
-    if(!cards.isEmpty())
-    {
-      if(force) {
+    if (!cards.isEmpty()) {
+      if (force) {
         cards.forEach(card -> card.getTags().remove(tag));
+      } else {
+        throw new ConflictWithDataException(
+            "There are still cards with this tag! Are you sure you want to delete it?", tag);
       }
-      else throw new ConflictWithDataException("There are still cards with this tag! Are you sure you want to delete it?", tag);
     }
 
     tagRepository.delete(tag);
@@ -67,7 +68,8 @@ public class TagService {
 
   @Transactional
   public TagDTO renameTag(UUID tagId, String name) {
-    Tag tag = tagRepository.findByTagId(tagId).orElseThrow(() -> new NotFoundException("Tag you are trying to rename does not exist"));
+    Tag tag = tagRepository.findByTagId(tagId)
+        .orElseThrow(() -> new NotFoundException("Tag you are trying to rename does not exist"));
     String normalizedName = name.trim();
     if (!tag.getName().equalsIgnoreCase(normalizedName)) {
       checkForDuplicates(normalizedName);

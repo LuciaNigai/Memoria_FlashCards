@@ -26,7 +26,8 @@ public class TemplateController {
 
   @PostMapping
   public ResponseEntity<TemplateDTO> createTemplate(@RequestBody TemplateDTO templateDTO) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(templateService.createTemplate(templateDTO));
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(templateService.createTemplate(templateDTO));
   }
 
   @GetMapping("/{templateId}")
@@ -35,7 +36,8 @@ public class TemplateController {
   }
 
   @DeleteMapping("/{templateId}")
-  public ResponseEntity<GeneralResponseDTO<Void>> deleteTemplate(@PathVariable(name = "templateId") UUID templateId) {
+  public ResponseEntity<GeneralResponseDTO<Void>> deleteTemplate(
+      @PathVariable(name = "templateId") UUID templateId) {
     templateService.deleteTemplate(templateId);
     return ResponseEntity.ok().body(new GeneralResponseDTO<>("Template Successfully deleted"));
   }

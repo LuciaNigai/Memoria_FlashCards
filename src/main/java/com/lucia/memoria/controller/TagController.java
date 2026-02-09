@@ -33,7 +33,7 @@ public class TagController {
     return ResponseEntity.created(location).body(created);
   }
 
-//  TODO change ti to getUserTags and move to user Controller
+  //  TODO change ti to getUserTags and move to user Controller
   @GetMapping
   public ResponseEntity<List<TagDTO>> getTags() {
     return ResponseEntity.ok().body(tagService.getAllTags());
@@ -41,7 +41,7 @@ public class TagController {
 
   @PatchMapping("/{tagId}")
   public ResponseEntity<TagDTO> renameTag(@PathVariable("tagId") UUID tagId, @RequestBody
-      RenameRequestDTO newName) {
+  RenameRequestDTO newName) {
     return ResponseEntity.ok().body(tagService.renameTag(tagId, newName.name()));
   }
 

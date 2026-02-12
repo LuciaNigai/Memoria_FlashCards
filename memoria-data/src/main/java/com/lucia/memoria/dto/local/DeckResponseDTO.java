@@ -4,6 +4,7 @@ package com.lucia.memoria.dto.local;
 import com.lucia.memoria.helper.AccessLevel;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.util.ArrayList;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,6 @@ public class DeckResponseDTO {
   private String name;
   private AccessLevel accessLevel;
   private String path;
-  private List<DeckResponseDTO> childDecks;
+  private List<DeckResponseDTO> childDecks = new ArrayList<>();;
 
 }

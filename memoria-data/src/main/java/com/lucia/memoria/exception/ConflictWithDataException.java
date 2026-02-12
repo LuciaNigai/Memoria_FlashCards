@@ -1,6 +1,5 @@
 package com.lucia.memoria.exception;
 
-import java.util.List;
 import lombok.Getter;
 
 @Getter

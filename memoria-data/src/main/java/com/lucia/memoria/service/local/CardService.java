@@ -1,7 +1,7 @@
 package com.lucia.memoria.service.local;
 
-import com.lucia.memoria.dto.local.CardResponseDTO;
 import com.lucia.memoria.dto.local.CardRequestDTO;
+import com.lucia.memoria.dto.local.CardResponseDTO;
 import com.lucia.memoria.dto.local.FieldDTO;
 import com.lucia.memoria.dto.local.ResponseDeckWithCardsDTO;
 import com.lucia.memoria.exception.NotFoundException;
@@ -12,26 +12,25 @@ import com.lucia.memoria.mapper.TemplateFieldMapper;
 import com.lucia.memoria.model.Card;
 import com.lucia.memoria.model.Deck;
 import com.lucia.memoria.model.Field;
-import com.lucia.memoria.model.TemplateField;
 import com.lucia.memoria.model.Template;
+import com.lucia.memoria.model.TemplateField;
 import com.lucia.memoria.repository.CardRepository;
 import com.lucia.memoria.service.helper.CardValidator;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CardService {
 
   private final CardRepository cardRepository;

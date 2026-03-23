@@ -1,6 +1,7 @@
 package com.lucia.memoria.service.helper;
 
 import com.lucia.memoria.dto.local.FieldMinimalDTO;
+import com.lucia.memoria.exception.ConflictWithDataException;
 import com.lucia.memoria.exception.DuplicateException;
 import com.lucia.memoria.helper.FieldRole;
 import com.lucia.memoria.model.Card;
@@ -40,7 +41,7 @@ public class CardValidator {
         .collect(Collectors.toSet());
 
     if (!roles.contains(FieldRole.FRONT) || !roles.contains(FieldRole.BACK)) {
-      throw new IllegalArgumentException("Card must have at least one FRONT and one BACK field");
+      throw new ConflictWithDataException("Card must have at least one FRONT and one BACK field");
     }
   }
 }

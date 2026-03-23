@@ -4,11 +4,9 @@ import com.lucia.memoria.dto.local.UserDTO;
 import com.lucia.memoria.mapper.UserMapper;
 import com.lucia.memoria.model.User;
 import com.lucia.memoria.repository.UserRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -48,6 +46,6 @@ public class UserService {
   public List<UserDTO> getAllUsers() {
     return userRepository.findAll().stream()
         .map(userMapper::toDTO)
-        .collect(Collectors.toList());
+        .toList();
   }
 }

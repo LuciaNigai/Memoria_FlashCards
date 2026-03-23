@@ -1,5 +1,6 @@
 package com.lucia.memoria.model;
 
+import com.lucia.memoria.exception.ConflictWithDataException;
 import com.lucia.memoria.helper.FieldType;
 import com.lucia.memoria.helper.TemplateFieldType;
 import jakarta.persistence.Column;
@@ -28,7 +29,7 @@ public class Field {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long Id;
+  private Long id;
 
   @Column(name = "field_id", nullable = false, unique = true, updatable = false)
   private UUID fieldId = UUID.randomUUID();
@@ -49,7 +50,7 @@ public class Field {
     field.setFieldId(UUID.randomUUID());
     field.setCard(card);
     field.setTemplateField(templateField);
-    field.updateContent(content); // Reuse your validation logic!
+    field.updateContent(content);
     return field;
   }
 
@@ -57,7 +58,7 @@ public class Field {
     TemplateFieldType type = this.templateField.getTemplateFieldType();
 
     if (type == null) {
-      throw new IllegalArgumentException("TemplateFieldType must not be null");
+      throw new ConflictWithDataException("TemplateFieldType must not be null");
     }
 
     // 1. Handle Enum/Multi-tag logic internally
@@ -70,7 +71,7 @@ public class Field {
   }
   private void validateEnumOptions(String content, TemplateFieldType type) {
     if (type.getOptions() == null || !type.getOptions().contains(content)) {
-      throw new IllegalArgumentException(
+      throw new ConflictWithDataException(
           "Invalid option. Choose one of: " + type.getOptions()
       );
     }

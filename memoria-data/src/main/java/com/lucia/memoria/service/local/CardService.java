@@ -44,7 +44,7 @@ public class CardService {
 
 
   @Transactional
-  public CardRequestDTO createCard(CardRequestDTO cardDTO, boolean saveDuplicate) {
+  public CardResponseDTO createCard(CardRequestDTO cardDTO, boolean saveDuplicate) {
     // 1. Fetch relevant data
     Deck deck = deckService.getDeckEntityById(cardDTO.getDeckId());
     Template template = templateService.getTemplateEntityById(cardDTO.getTemplateId());
@@ -71,11 +71,11 @@ public class CardService {
 
     // 4. Validation & Save
     cardValidator.validateCardStructure(card);
-    return cardMapper.toMinimalDTO(cardRepository.save(card));
+    return cardMapper.toDTO(cardRepository.save(card));
   }
 
   @Transactional
-  public CardRequestDTO updateCard(UUID cardId, CardRequestDTO cardDTO, boolean saveDuplicates) {
+  public CardResponseDTO updateCard(UUID cardId, CardRequestDTO cardDTO, boolean saveDuplicates) {
     // 1. Fetch
     Card card = cardRepository.findByCardIdWithFieldsAndFieldTemplates(cardId)
         .orElseThrow(() -> new NotFoundException("Card not found"));
@@ -93,7 +93,7 @@ public class CardService {
 
     // 5. Business Rules & save
     cardValidator.validateCardStructure(card);
-    return cardMapper.toMinimalDTO(cardRepository.save(card));
+    return cardMapper.toDTO(cardRepository.save(card));
   }
 
 

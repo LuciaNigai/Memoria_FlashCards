@@ -12,7 +12,6 @@ import org.mapstruct.Named;
 @Mapper(componentModel = "spring")
 public interface TagMapper {
 
-  Tag toEntity(TagDTO tagDTO);
 
   @Mapping(target = "userId", source = "user", qualifiedByName = "userToUserId")
   TagDTO toDTO(Tag tag);

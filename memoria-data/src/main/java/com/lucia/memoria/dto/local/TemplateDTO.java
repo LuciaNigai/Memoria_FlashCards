@@ -27,5 +27,5 @@ public class TemplateDTO {
   @Size(min = 2, message = "Template should have at least two fields")
   @Valid
   private List<TemplateFieldDTO> fields;
-  private Boolean includesPartOfSpeech;
+  private boolean includesPartOfSpeech;
 }

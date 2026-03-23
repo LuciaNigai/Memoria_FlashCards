@@ -63,7 +63,7 @@ public class TemplateService {
 
     boolean hasPOS = template.getFields().stream()
         .anyMatch(f -> PART_OF_SPEECH.equalsIgnoreCase(f.getName()));
-    if (templateDTO.getIncludesPartOfSpeech() && !hasPOS) {
+    if (templateDTO.isIncludesPartOfSpeech() && !hasPOS) {
       addPartOfSpeechFieldIfNeeded(templateDTO, template);
     }
 
@@ -75,7 +75,6 @@ public class TemplateService {
     return templateMapper.toDTO(getTemplateEntityById(templateId));
   }
 
-  @Transactional(readOnly = true)
   public Template getTemplateEntityById(UUID templateId) {
     return templateRepository.findByTemplateId(templateId)
         .orElseThrow(() -> new NotFoundException("Template Not found"));
@@ -121,7 +120,7 @@ public class TemplateService {
   }
 
   private static void addPartOfSpeechFieldIfNeeded(TemplateDTO templateDTO, Template template) {
-    if (templateDTO.getIncludesPartOfSpeech()) {
+    if (templateDTO.isIncludesPartOfSpeech()) {
       TemplateField templateField = new TemplateField();
       templateField.setTemplateFieldId(UUID.randomUUID());
       templateField.setName(PART_OF_SPEECH);

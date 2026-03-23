@@ -15,10 +15,7 @@ public interface TemplateMapper {
   @Mapping(target = "ownerId", source = "owner", qualifiedByName = "ownerToOwnerId")
   TemplateDTO toDTO(Template template);
 
-  @Mapping(target = "ownerId", source = "owner", qualifiedByName = "ownerToOwnerId")
   List<TemplateDTO> toDTOList(List<Template> templateList);
-
-  Template toEntity(TemplateDTO templateDTO);
 
   @Named("ownerToOwnerId")
   default UUID mapOwnerToOwnerId(User user) {

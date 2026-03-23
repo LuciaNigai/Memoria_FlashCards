@@ -8,7 +8,6 @@ import com.lucia.memoria.mapper.TagMapper;
 import com.lucia.memoria.model.Card;
 import com.lucia.memoria.model.Tag;
 import com.lucia.memoria.model.User;
-import com.lucia.memoria.repository.CardRepository;
 import com.lucia.memoria.repository.TagRepository;
 import java.util.List;
 import java.util.Optional;

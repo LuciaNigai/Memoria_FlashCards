@@ -3,6 +3,7 @@ package com.lucia.memoria.dto.local;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,5 +24,5 @@ public class CardResponseDTO {
   @NotNull
   private UUID templateId;
   @NotEmpty
-  private List<FieldDTO> fieldDTOList;
+  private List<FieldDTO> fieldDTOList = new ArrayList<>();
 }

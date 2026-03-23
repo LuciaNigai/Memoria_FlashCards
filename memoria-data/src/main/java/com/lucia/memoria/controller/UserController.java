@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,8 +40,9 @@ public class UserController {
     this.templateService = templateService;
   }
 
+  @Tag(name = "create")
   @Operation(summary = "Create new user")
-  @ApiResponse(responseCode = "200", description = "Created user", content = {
+  @ApiResponse(responseCode = "201", description = "Created user", content = {
       @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))})
   @PostMapping
   public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
@@ -48,6 +50,7 @@ public class UserController {
     return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
   }
 
+  @Tag(name = "find")
   @Operation(summary = "Get user by id")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "User", content = {
@@ -59,6 +62,7 @@ public class UserController {
     return ResponseEntity.ok(user);
   }
 
+  @Tag(name = "find")
   @Operation(summary = "Get all users")
   @ApiResponse(responseCode = "200", description = "Returns a list of all users", content = {
       @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = UserDTO.class)))})
@@ -68,11 +72,13 @@ public class UserController {
     return ResponseEntity.ok(users);
   }
 
+  @Tag(name = "find")
   @GetMapping("/{userId}/templates")
   public ResponseEntity<List<TemplateDTO>> getUserTemplates(@PathVariable("userId") UUID userId) {
     return ResponseEntity.ok().body(templateService.getTemplatesByUserId(userId));
   }
 
+  @Tag(name = "find")
   @GetMapping("/{userId}/decks")
   public ResponseEntity<List<DeckResponseDTO>> getUserDecks(@PathVariable("userId") UUID userId) {
     return ResponseEntity.ok().body(deckService.getDecksByUserId(userId));

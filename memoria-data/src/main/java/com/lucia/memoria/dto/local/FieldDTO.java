@@ -17,14 +17,14 @@ public class FieldDTO {
 
   @NotNull
   @Valid
-  private TemplateFieldDTO fieldTemplate;
+  private TemplateFieldDTO templateField;
   private UUID fieldId;
   private String content;
 
   public static FieldDTO blankWithTemplate(TemplateFieldDTO templateFieldDTO) {
     FieldDTO dto = new FieldDTO();
     dto.setContent(null);
-    dto.setFieldTemplate(templateFieldDTO);
+    dto.setTemplateField(templateFieldDTO);
     return dto;
   }
 }

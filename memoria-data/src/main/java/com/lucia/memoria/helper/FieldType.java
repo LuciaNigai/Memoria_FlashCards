@@ -4,6 +4,5 @@ public enum FieldType {
   TEXT,
   ENUM,
   BOOLEAN,
-  MULTI_TAG,
-  NUMBER;
+  MULTI_TAG
 }

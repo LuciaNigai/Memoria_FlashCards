@@ -26,6 +26,6 @@ public class DeckResponseDTO {
   private String name;
   private AccessLevel accessLevel;
   private String path;
-  private List<DeckResponseDTO> childDecks = new ArrayList<>();;
+  private List<DeckResponseDTO> childDecks = new ArrayList<>();
 
 }

@@ -9,9 +9,9 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface DeckMapper {
 
-  @Mapping(target = "userId", source = "user", qualifiedByName = "userToUserId")
+  @Mapping(target = "userId", source = "user.userId")
   DeckResponseDTO toDTO(Deck deck);
 
-  @Mapping(target = "userId", source = "user", qualifiedByName = "userToUserId")
+  @Mapping(target = "userId", source = "user.userId")
   DeckRequestDTO toMinimalDTO(Deck deck);
 }

@@ -29,6 +29,6 @@ public class GoogleAPIService {
             .build())
         .retrieve()
         .bodyToMono(List.class)
-        .map(response -> ((List<List<String>>) (response.get(0))).get(0).get(0));
+        .map(response -> ((List<List<String>>) (response.getFirst())).getFirst().getFirst());
   }
 }

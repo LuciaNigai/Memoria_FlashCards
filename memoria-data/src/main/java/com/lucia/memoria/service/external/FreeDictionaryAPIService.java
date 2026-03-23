@@ -49,7 +49,7 @@ public class FreeDictionaryAPIService {
         // Retry on server errors with exponential backoff
         .retryWhen(Retry.backoff(3, Duration.ofSeconds(2))
             .maxBackoff(Duration.ofSeconds(10))
-            .filter(throwable -> throwable instanceof ServerApiException)
+            .filter(ServerApiException.class::isInstance)
             .onRetryExhaustedThrow((spec, signal) ->
                 new ServerApiException("Retries exhausted for word: " + word, signal.failure())))
         // Optional: fallback to empty list if server error persists

@@ -24,5 +24,5 @@ public class CardResponseDTO {
   @NotNull
   private UUID templateId;
   @NotEmpty
-  private List<FieldDTO> fieldDTOList = new ArrayList<>();
+  private List<FieldDTO> fields = new ArrayList<>();
 }

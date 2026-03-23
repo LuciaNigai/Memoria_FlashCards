@@ -1,5 +1,6 @@
 package com.lucia.memoria.dto.local;
 
+import java.util.ArrayList;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,5 +15,5 @@ import java.util.List;
 public class ResponseDeckWithCardsDTO {
 
   private DeckRequestDTO deck;
-  private List<CardRequestDTO> cards;
+  private List<CardRequestDTO> cards = new ArrayList<>();
 }

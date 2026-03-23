@@ -23,5 +23,5 @@ public class CardRequestDTO {
   private UUID templateId;
   @NotNull
   @Size(min = 2, message = "Card should have at least two fields")
-  private List<FieldMinimalDTO> fieldRequestDTOList;
+  private List<FieldMinimalDTO> fields;
 }

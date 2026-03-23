@@ -103,7 +103,7 @@ public class TemplateService {
     if (!templateCards.isEmpty()) {
       throw new ConflictWithDataException(
           "Template cannot be deleted. There are still cards that use that template.",
-          cardMapper.toMinimalDTOList(templateCards));
+          cardMapper.toRequestDTOList(templateCards));
     }
     templateRepository.delete(template);
   }

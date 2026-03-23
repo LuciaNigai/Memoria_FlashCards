@@ -3,8 +3,6 @@ package com.lucia.memoria.controller;
 import com.lucia.memoria.dto.local.CardRequestDTO;
 import com.lucia.memoria.dto.local.CardResponseDTO;
 import com.lucia.memoria.dto.local.GeneralResponseDTO;
-import com.lucia.memoria.exception.ConflictWithDataException;
-import com.lucia.memoria.exception.NotFoundException;
 import com.lucia.memoria.service.local.CardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

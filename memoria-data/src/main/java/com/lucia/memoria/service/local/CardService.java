@@ -56,7 +56,7 @@ public class CardService {
     Map<UUID, TemplateField> templateFields = template.getFields().stream()
         .collect(Collectors.toMap(TemplateField::getTemplateFieldId, Function.identity()));
 
-    Optional.ofNullable(cardDTO.getFieldRequestDTOList())
+    Optional.ofNullable(cardDTO.getFields())
         .orElse(Collections.emptyList())
         .forEach(dto -> {
           cardValidator.validateDuplicates(dto, saveDuplicate, null);
@@ -71,7 +71,7 @@ public class CardService {
 
     // 4. Validation & Save
     cardValidator.validateCardStructure(card);
-    return cardMapper.toDTO(cardRepository.save(card));
+    return cardMapper.toResponseDTO(cardRepository.save(card));
   }
 
   @Transactional
@@ -85,15 +85,15 @@ public class CardService {
         .collect(Collectors.toMap(TemplateField::getTemplateFieldId, Function.identity()));
 
     // 3. Cross-cutting concern (Duplicate check)
-    cardDTO.getFieldRequestDTOList().forEach(dto ->
+    cardDTO.getFields().forEach(dto ->
         cardValidator.validateDuplicates(dto, saveDuplicates, card.getCardId()));
 
     // 4. Delegation (The "tell, don't ask" principle)
-    card.syncFields(cardDTO.getFieldRequestDTOList(), templateFields);
+    card.syncFields(cardDTO.getFields(), templateFields);
 
     // 5. Business Rules & save
     cardValidator.validateCardStructure(card);
-    return cardMapper.toDTO(cardRepository.save(card));
+    return cardMapper.toResponseDTO(cardRepository.save(card));
   }
 
 
@@ -103,14 +103,14 @@ public class CardService {
         .orElseThrow(() -> new NotFoundException("Invalid card ID provided."));
 
     // 1. Map basic info (cardId, deckId, templateId)
-    CardResponseDTO cardResponseDTO = cardMapper.toDTO(card);
+    CardResponseDTO cardResponseDTO = cardMapper.toResponseDTO(card);
 
     // 2. Build the "Full" list (Existing fields + Blank fields from template)
     List<TemplateField> allPossibleFields = card.getTemplate().getFields();
     List<FieldDTO> fullFields = buildFullFields(card, allPossibleFields);
 
     // 3. Manually set it
-    cardResponseDTO.setFieldDTOList(fullFields);
+    cardResponseDTO.setFields(fullFields);
 
     return cardResponseDTO;
   }
@@ -143,7 +143,7 @@ public class CardService {
     return Optional.ofNullable(field)
         .map(f -> {
           FieldDTO fieldDTO = fieldMapper.toDTO(f);
-          fieldDTO.setFieldTemplate(templateFieldMapper.toDTO(templateField));
+          fieldDTO.setTemplateField(templateFieldMapper.toDTO(templateField));
           return fieldDTO;
         })
         .orElse(FieldDTO.blankWithTemplate(templateFieldMapper.toDTO(templateField)));

@@ -1,9 +1,11 @@
 package com.lucia.memoria.controller;
 
 import com.lucia.memoria.dto.local.DeckResponseDTO;
+import com.lucia.memoria.dto.local.TagDTO;
 import com.lucia.memoria.dto.local.TemplateDTO;
 import com.lucia.memoria.dto.local.UserDTO;
 import com.lucia.memoria.service.local.DeckService;
+import com.lucia.memoria.service.local.TagService;
 import com.lucia.memoria.service.local.TemplateService;
 import com.lucia.memoria.service.local.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +15,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.net.URI;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,18 +31,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/data/users")
+@RequiredArgsConstructor
 public class UserController {
 
   private final UserService userService;
   private final DeckService deckService;
   private final TemplateService templateService;
+  private final TagService tagService;
 
-  public UserController(UserService userService, DeckService deckService,
-      TemplateService templateService) {
-    this.userService = userService;
-    this.deckService = deckService;
-    this.templateService = templateService;
-  }
 
   @Tag(name = "create")
   @Operation(summary = "Create new user")
@@ -82,5 +82,19 @@ public class UserController {
   @GetMapping("/{userId}/decks")
   public ResponseEntity<List<DeckResponseDTO>> getUserDecks(@PathVariable("userId") UUID userId) {
     return ResponseEntity.ok().body(deckService.getDecksByUserId(userId));
+  }
+
+  @Tag(name = "create")
+  @PostMapping("/{userId}/tags")
+  public ResponseEntity<TagDTO> createTag(@PathVariable("userId") UUID userId, @RequestBody TagDTO tagDTO) {
+    TagDTO created = tagService.createTag(userId, tagDTO);
+    URI location = URI.create("/tags/" + created.tagId());
+    return ResponseEntity.created(location).body(created);
+  }
+
+  @Tag(name = "find")
+  @GetMapping("/{userId}/tags")
+  public ResponseEntity<List<TagDTO>> getUserTags(@PathVariable("userId") UUID userId) {
+    return ResponseEntity.ok().body(tagService.getAllUserTags(userId));
   }
 }

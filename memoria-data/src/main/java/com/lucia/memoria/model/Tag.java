@@ -39,6 +39,9 @@ public class Tag {
   @Column(name = "name", nullable = false)
   String name;
 
+  @Column(name = "color", nullable = false)
+  String color;
+
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")
   private User user;

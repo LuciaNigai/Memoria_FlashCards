@@ -29,22 +29,24 @@ public class TagService {
   private final UserService userService;
 
   @Transactional
-  public TagDTO createTag(UUID userId, String name) {
+  public TagDTO createTag(UUID userId, TagDTO tagDTO) {
     User user = userService.getUserEntityById(userId);
-    String normalizedName = name.trim();
+    String normalizedName = tagDTO.name().trim();
     checkForDuplicates(normalizedName);
 
     Tag tag = new Tag();
     tag.setTagId(UUID.randomUUID());
     tag.setUser(user);
     tag.setName(normalizedName);
+    tag.setColor(tagDTO.color());
 
     return tagMapper.toDTO(tagRepository.save(tag));
   }
 
   @Transactional(readOnly = true)
-  public List<TagDTO> getAllTags() {
-    List<Tag> tags = tagRepository.findAll(Sort.by("name"));
+  public List<TagDTO> getAllUserTags(UUID userId) {
+    User user = userService.getUserEntityById(userId);
+    List<Tag> tags = tagRepository.findByUser(user);
     return tagMapper.toDTOList(tags);
   }
 

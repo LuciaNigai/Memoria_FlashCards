@@ -26,19 +26,6 @@ public class TagController {
 
   private final TagService tagService;
 
-  @PostMapping
-  public ResponseEntity<TagDTO> createTag(@RequestBody TagDTO tagDTO) {
-    TagDTO created = tagService.createTag(tagDTO.userId(), tagDTO.name());
-    URI location = URI.create("/tags/" + created.tagId());
-    return ResponseEntity.created(location).body(created);
-  }
-
-  //  TODO change ti to getUserTags and move to user Controller
-  @GetMapping
-  public ResponseEntity<List<TagDTO>> getTags() {
-    return ResponseEntity.ok().body(tagService.getAllTags());
-  }
-
   @PatchMapping("/{tagId}")
   public ResponseEntity<TagDTO> renameTag(@PathVariable("tagId") UUID tagId, @RequestBody
   RenameRequestDTO newName) {

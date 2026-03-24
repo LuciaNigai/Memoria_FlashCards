@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
 
-    <!-- create "users" table -->
-    <changeSet id="1" author="lucia">
+  <!-- create "users" table -->
+  <changeSet id="1" author="lucia">
 
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="users"/>
-            </not>
-        </preConditions>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="users"/>
+      </not>
+    </preConditions>
 
-        <createTable tableName="users">
-            <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="user_id" type="uuid">
-                <constraints nullable="false" unique="true"/>
-            </column>
-            <column name="username" type="VARCHAR(200)">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
+    <createTable tableName="users">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="uuid">
+        <constraints nullable="false" unique="true"/>
+      </column>
+      <column name="username" type="VARCHAR(200)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
 
-        <createIndex tableName="users" indexName="idx_user_id">
-            <column name="user_id"/>
-        </createIndex>
+    <createIndex tableName="users" indexName="idx_user_id">
+      <column name="user_id"/>
+    </createIndex>
 
-        <rollback>
-            <dropIndex tableName="users" indexName="idx_user_id"/>
-            <dropTable tableName="users"/>
-        </rollback>
+    <rollback>
+      <dropIndex tableName="users" indexName="idx_user_id"/>
+      <dropTable tableName="users"/>
+    </rollback>
 
-    </changeSet>
+  </changeSet>
 </databaseChangeLog>

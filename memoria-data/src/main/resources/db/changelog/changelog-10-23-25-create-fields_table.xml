@@ -1,60 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
 
-<!--    create "fields" table-->
-    <changeSet id="7" author="lucia">
+  <!--    create "fields" table-->
+  <changeSet id="7" author="lucia">
 
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="fields"/>
-            </not>
-        </preConditions>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="fields"/>
+      </not>
+    </preConditions>
 
-        <createTable tableName="fields">
-            <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="field_id" type="uuid">
-                <constraints nullable="false" unique="true"/>
-            </column>
-            <column name="content" type="VARCHAR(10000)">
-            </column>
-            <column name="card_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="template_field_id" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
+    <createTable tableName="fields">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="field_id" type="uuid">
+        <constraints nullable="false" unique="true"/>
+      </column>
+      <column name="content" type="VARCHAR(10000)">
+      </column>
+      <column name="card_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="template_field_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
 
-        <addForeignKeyConstraint
-                baseTableName="fields"
-                baseColumnNames="card_id"
-                constraintName="dk_fields_cards"
-                referencedTableName="cards"
-                referencedColumnNames="id"
-                onDelete="CASCADE"/>
+    <addForeignKeyConstraint
+      baseTableName="fields"
+      baseColumnNames="card_id"
+      constraintName="dk_fields_cards"
+      referencedTableName="cards"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
 
-        <addForeignKeyConstraint
-                baseTableName="fields"
-                baseColumnNames="template_field_id"
-                constraintName="fk_fields_template_fields"
-                referencedTableName="template_fields"
-                referencedColumnNames="id"
-                onDelete="CASCADE"/>
+    <addForeignKeyConstraint
+      baseTableName="fields"
+      baseColumnNames="template_field_id"
+      constraintName="fk_fields_template_fields"
+      referencedTableName="template_fields"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
 
-        <createIndex tableName="fields" indexName="idx_field_id">
-            <column name="field_id"/>
-        </createIndex>
+    <createIndex tableName="fields" indexName="idx_field_id">
+      <column name="field_id"/>
+    </createIndex>
 
-        <rollback>
-            <dropIndex tableName="fields" indexName="idx_field_id"/>
-            <dropTable tableName="fields"/>
-        </rollback>
+    <rollback>
+      <dropIndex tableName="fields" indexName="idx_field_id"/>
+      <dropTable tableName="fields"/>
+    </rollback>
 
-    </changeSet>
+  </changeSet>
 </databaseChangeLog>

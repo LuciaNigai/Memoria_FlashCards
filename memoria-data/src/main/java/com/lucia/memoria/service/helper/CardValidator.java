@@ -6,12 +6,9 @@ import com.lucia.memoria.exception.DuplicateException;
 import com.lucia.memoria.helper.FieldRole;
 import com.lucia.memoria.model.Card;
 import com.lucia.memoria.model.Field;
-import com.lucia.memoria.model.TemplateField;
 import com.lucia.memoria.repository.CardRepository;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +20,9 @@ public class CardValidator {
 
   public void validateDuplicates(
       FieldMinimalDTO minimalDTO, boolean saveDuplicate, UUID currentCardId, FieldRole fieldRole) {
-    List<UUID> duplicateIds = cardRepository.findCardIdsByFieldRoleAndContent(fieldRole, minimalDTO.getContent())
+    String sanitizedContent = minimalDTO.getContent() != null ? minimalDTO.getContent().trim() : "";
+
+    List<UUID> duplicateIds = cardRepository.findCardIdsByFieldRoleAndContent(fieldRole, sanitizedContent)
         .stream()
         .filter(id -> !id.equals(currentCardId))
         .toList();
@@ -35,13 +34,30 @@ public class CardValidator {
   }
 
   public void validateCardStructure(Card card) {
-    Set<FieldRole> roles = card.getFields().stream()
-        .map(Field::getTemplateField)
-        .map(TemplateField::getFieldRole)
-        .collect(Collectors.toSet());
+    boolean hasFilledFront = false;
+    boolean hasFilledBack = false;
 
-    if (!roles.contains(FieldRole.FRONT) || !roles.contains(FieldRole.BACK)) {
-      throw new ConflictWithDataException("Card must have at least one FRONT and one BACK field");
+    for (Field field : card.getFields()) {
+      if (field.getTemplateField() == null || field.getContent() == null) {
+        continue;
+      }
+
+      if (!field.getContent().trim().isEmpty()) {
+        FieldRole role = field.getTemplateField().getFieldRole();
+        if (FieldRole.FRONT == role) {
+          hasFilledFront = true;
+        } else if (FieldRole.BACK == role) {
+          hasFilledBack = true;
+        }
+      }
+
+      if (hasFilledFront && hasFilledBack) {
+        return;
+      }
+    }
+
+    if (!hasFilledFront || !hasFilledBack) {
+      throw new ConflictWithDataException("Card must have at least one FRONT and one BACK field populated with text content");
     }
   }
 }

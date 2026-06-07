@@ -3,8 +3,10 @@ package com.lucia.memoria.service.local;
 import com.lucia.memoria.dto.local.CardRequestDTO;
 import com.lucia.memoria.dto.local.CardResponseDTO;
 import com.lucia.memoria.dto.local.FieldDTO;
+import com.lucia.memoria.dto.local.FieldMinimalDTO;
 import com.lucia.memoria.dto.local.ResponseDeckWithCardsDTO;
 import com.lucia.memoria.exception.NotFoundException;
+import com.lucia.memoria.helper.FieldRole;
 import com.lucia.memoria.mapper.CardMapper;
 import com.lucia.memoria.mapper.DeckWithCardsMapper;
 import com.lucia.memoria.mapper.FieldMapper;
@@ -56,18 +58,22 @@ public class CardService {
     Map<UUID, TemplateField> templateFields = template.getFields().stream()
         .collect(Collectors.toMap(TemplateField::getTemplateFieldId, Function.identity()));
 
-    Optional.ofNullable(cardDTO.getFields())
-        .orElse(Collections.emptyList())
-        .forEach(dto -> {
-          cardValidator.validateDuplicates(dto, saveDuplicate, null);
+    List<FieldMinimalDTO> fieldDTOs = Optional.ofNullable(cardDTO.getFields())
+        .orElse(Collections.emptyList());
+
+    fieldDTOs.forEach(dto -> {
           TemplateField tf = templateFields.get(dto.getTemplateFieldId());
           if (tf == null) {
-            throw new NotFoundException("Template field not found for ID: " + dto.getTemplateFieldId());
+            throw new NotFoundException(
+                "Template field not found for ID: " + dto.getTemplateFieldId());
           }
-
+          if (FieldRole.FRONT == tf.getFieldRole()) {
+            cardValidator.validateDuplicates(dto, saveDuplicate, null, FieldRole.FRONT);
+          }
           Field newField = Field.createNew(card, tf, dto.getContent());
           card.addField(newField);
-        });
+        }
+    );
 
     // 4. Validation & Save
     cardValidator.validateCardStructure(card);
@@ -86,7 +92,7 @@ public class CardService {
 
     // 3. Cross-cutting concern (Duplicate check)
     cardDTO.getFields().forEach(dto ->
-        cardValidator.validateDuplicates(dto, saveDuplicates, card.getCardId()));
+        cardValidator.validateDuplicates(dto, saveDuplicates, card.getCardId(), FieldRole.FRONT));
 
     // 4. Delegation (The "tell, don't ask" principle)
     card.syncFields(cardDTO.getFields(), templateFields);

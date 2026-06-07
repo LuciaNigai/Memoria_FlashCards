@@ -22,8 +22,8 @@ public class CardValidator {
   private final CardRepository cardRepository;
 
   public void validateDuplicates(
-      FieldMinimalDTO minimalDTO, boolean saveDuplicate, UUID currentCardId) {
-    List<UUID> duplicateIds = cardRepository.findCardIdsByFieldContent(minimalDTO.getContent())
+      FieldMinimalDTO minimalDTO, boolean saveDuplicate, UUID currentCardId, FieldRole fieldRole) {
+    List<UUID> duplicateIds = cardRepository.findCardIdsByFieldRoleAndContent(fieldRole, minimalDTO.getContent())
         .stream()
         .filter(id -> !id.equals(currentCardId))
         .toList();

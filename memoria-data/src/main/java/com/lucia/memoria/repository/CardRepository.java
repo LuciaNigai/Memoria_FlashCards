@@ -1,5 +1,6 @@
 package com.lucia.memoria.repository;
 
+import com.lucia.memoria.helper.FieldRole;
 import com.lucia.memoria.model.Card;
 import com.lucia.memoria.model.Deck;
 import com.lucia.memoria.model.Template;
@@ -26,8 +27,12 @@ public interface CardRepository extends JpaRepository<Card, Long> {
 
   @Query("SELECT c.cardId FROM Card c " +
       "JOIN c.fields f " +
-      "WHERE f.content = :content")
-  List<UUID> findCardIdsByFieldContent(@Param("content") String content);
+      "JOIN f.templateField tf " +
+      "WHERE tf.fieldRole = :fieldRole AND LOWER(f.content) = LOWER(:content)")
+  List<UUID> findCardIdsByFieldRoleAndContent(
+      @Param("fieldRole") FieldRole fieldRole,
+      @Param("content") String content
+  );
 
   Optional<Card> findByCardId(UUID cardId);
 

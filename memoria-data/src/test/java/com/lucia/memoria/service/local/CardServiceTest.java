@@ -3,8 +3,9 @@ package com.lucia.memoria.service.local;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +16,7 @@ import com.lucia.memoria.dto.local.FieldMinimalDTO;
 import com.lucia.memoria.dto.local.ResponseDeckWithCardsDTO;
 import com.lucia.memoria.dto.local.TemplateFieldDTO;
 import com.lucia.memoria.exception.NotFoundException;
+import com.lucia.memoria.helper.FieldRole;
 import com.lucia.memoria.helper.FieldType;
 import com.lucia.memoria.helper.TemplateFieldType;
 import com.lucia.memoria.mapper.CardMapper;
@@ -37,6 +39,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -96,14 +100,16 @@ class CardServiceTest {
     cardResponseDTO.setId(cardId);
   }
 
-  @Test
-  @DisplayName("Should successfully create a card with fields")
-  void createCard_success() {
+  @ParameterizedTest
+  @ValueSource(booleans = {true,false})
+  @DisplayName("Should successfully create a card with fields regardless of saveDuplicate flag when no duplicates exist")
+  void createCard_success(boolean saveDuplicateFlag) {
     // Arrange
     UUID templateFieldId = UUID.randomUUID();
     TemplateField tf = new TemplateField();
     tf.setTemplateFieldId(templateFieldId);
     tf.setTemplateFieldType(new TemplateFieldType(FieldType.TEXT));
+    tf.setFieldRole(FieldRole.FRONT);
     template.getFields().add(tf);
 
     FieldMinimalDTO fieldDto = new FieldMinimalDTO();
@@ -117,11 +123,11 @@ class CardServiceTest {
     when(cardMapper.toResponseDTO(card)).thenReturn(cardResponseDTO);
 
     // Act
-    CardResponseDTO result = cardService.createCard(cardRequestDTO, false);
+    CardResponseDTO result = cardService.createCard(cardRequestDTO, saveDuplicateFlag);
 
     // Assert
     assertNotNull(result);
-    verify(cardValidator).validateDuplicates(any(), anyBoolean(), any());
+    verify(cardValidator).validateDuplicates(eq(fieldDto), eq(saveDuplicateFlag), isNull(), eq(FieldRole.FRONT));
     verify(cardValidator).validateCardStructure(any());
     verify(cardRepository).save(any(Card.class));
   }

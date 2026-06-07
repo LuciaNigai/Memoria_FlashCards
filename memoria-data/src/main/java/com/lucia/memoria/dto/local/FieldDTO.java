@@ -18,7 +18,7 @@ public class FieldDTO {
   @NotNull
   @Valid
   private TemplateFieldDTO templateField;
-  private UUID fieldId;
+  private UUID id;
   private String content;
 
   public static FieldDTO blankWithTemplate(TemplateFieldDTO templateFieldDTO) {

@@ -13,13 +13,13 @@ public interface CardMapper {
 
   @Mapping(target = "templateId", source = "template.templateId")
   @Mapping(target = "deckId", source = "deck.deckId")
+  @Mapping(target = "id", source = "cardId")
   CardRequestDTO toRequestDTO(Card card);
 
-  @Mapping(target = "templateId", source = "template.templateId")
-  @Mapping(target = "deckId", source = "deck.deckId")
   List<CardRequestDTO> toRequestDTOList(List<Card> cards);
 
   @Mapping(target = "templateId", source = "template.templateId")
   @Mapping(target = "deckId", source = "deck.deckId")
+  @Mapping(target = "id", source = "cardId")
   CardResponseDTO toResponseDTO(Card card);
 }

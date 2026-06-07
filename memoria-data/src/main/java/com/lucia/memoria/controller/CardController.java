@@ -108,4 +108,7 @@ public class CardController {
     cardService.deleteCard(cardId);
     return ResponseEntity.ok().body(new GeneralResponseDTO<>("Card deleted successfully."));
   }
+
+  // TODO: implement attach tag
+  // TODO: implement detach tag
 }

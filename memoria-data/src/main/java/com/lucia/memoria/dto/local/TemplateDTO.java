@@ -18,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class TemplateDTO {
 
-  private UUID templateId;
+  private UUID id;
   @NotNull
   private UUID ownerId;
   @NotBlank

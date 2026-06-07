@@ -16,7 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CardRequestDTO {
 
-  private UUID cardId;
+  private UUID id;
   @NotNull
   private UUID deckId;
   @NotNull

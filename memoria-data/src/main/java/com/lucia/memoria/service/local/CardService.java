@@ -148,4 +148,7 @@ public class CardService {
         })
         .orElse(FieldDTO.blankWithTemplate(templateFieldMapper.toDTO(templateField)));
   }
+
+  // TODO: implement attach tag
+  // TODO: implement detach tag
 }

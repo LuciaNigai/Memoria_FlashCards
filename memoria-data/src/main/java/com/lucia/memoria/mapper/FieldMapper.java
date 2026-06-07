@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring", uses = TemplateFieldMapper.class)
 public interface FieldMapper {
 
+  @Mapping(target = "id", source = "fieldId")
   FieldDTO toDTO(Field field);
 
   @Mapping(target = "templateFieldId", source = "templateField.templateFieldId")

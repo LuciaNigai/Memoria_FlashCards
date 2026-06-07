@@ -16,7 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class DeckRequestDTO {
 
-  private UUID deckId;
+  private UUID id;
   @NotBlank
   private String name;
   private AccessLevel accessLevel;

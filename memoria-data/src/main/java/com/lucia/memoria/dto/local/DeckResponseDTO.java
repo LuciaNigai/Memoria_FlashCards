@@ -19,7 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class DeckResponseDTO {
 
-  private UUID deckId;
+  private UUID id;
   @NotNull
   private UUID userId;
   @NotBlank

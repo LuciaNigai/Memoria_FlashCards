@@ -10,6 +10,7 @@ import org.mapstruct.Mapping;
 public interface TemplateMapper {
 
   @Mapping(target = "ownerId", source = "owner.userId")
+  @Mapping(target = "id", source = "templateId")
   TemplateDTO toDTO(Template template);
 
   List<TemplateDTO> toDTOList(List<Template> templateList);

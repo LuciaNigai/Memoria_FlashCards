@@ -17,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class TemplateFieldDTO {
 
-  private UUID templateFieldId;
+  private UUID id;
   @NotBlank
   private String name;
   @NotNull

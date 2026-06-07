@@ -10,8 +10,10 @@ import org.mapstruct.Mapping;
 public interface DeckMapper {
 
   @Mapping(target = "userId", source = "user.userId")
+  @Mapping(target = "id", source = "deckId")
   DeckResponseDTO toDTO(Deck deck);
 
   @Mapping(target = "userId", source = "user.userId")
+  @Mapping(target = "id", source = "deckId")
   DeckRequestDTO toMinimalDTO(Deck deck);
 }

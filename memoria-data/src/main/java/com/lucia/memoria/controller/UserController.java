@@ -1,6 +1,7 @@
 package com.lucia.memoria.controller;
 
 import com.lucia.memoria.dto.local.DeckResponseDTO;
+import com.lucia.memoria.dto.local.GeneralResponseDTO;
 import com.lucia.memoria.dto.local.TagDTO;
 import com.lucia.memoria.dto.local.TemplateDTO;
 import com.lucia.memoria.dto.local.UserDTO;
@@ -19,6 +20,7 @@ import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,7 +29,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 import java.util.UUID;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+// TODO: will be removed and the logic moved to other Services when the userId will be extracted from JWT
 
 @RestController
 @RequestMapping("/api/data/users")
@@ -48,6 +53,19 @@ public class UserController {
   public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
     UserDTO savedUser = userService.createUser(userDTO);
     return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+  }
+
+  @Tag(name = "delete")
+  @Operation(summary = "Delete user by id")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "User", content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))}),
+      @ApiResponse(responseCode = "400", description = "User not found", content = @Content)})
+  @DeleteMapping("/{userId}")
+  public ResponseEntity<GeneralResponseDTO> deleteUser(@PathVariable("userId") UUID userId,
+      @RequestParam(name = "force", defaultValue = "false") boolean force) {
+    userService.deleteUser(userId, force);
+    return ResponseEntity.ok().body(new GeneralResponseDTO<>("User deleted successfully."));
   }
 
   @Tag(name = "find")
@@ -88,7 +106,7 @@ public class UserController {
   @PostMapping("/{userId}/tags")
   public ResponseEntity<TagDTO> createTag(@PathVariable("userId") UUID userId, @RequestBody TagDTO tagDTO) {
     TagDTO created = tagService.createTag(userId, tagDTO);
-    URI location = URI.create("/tags/" + created.tagId());
+    URI location = URI.create("/tags/" + created.id());
     return ResponseEntity.created(location).body(created);
   }
 

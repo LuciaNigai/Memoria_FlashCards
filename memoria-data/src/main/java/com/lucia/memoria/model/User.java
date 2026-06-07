@@ -17,6 +17,8 @@ import lombok.Setter;
 import java.util.List;
 import java.util.UUID;
 
+// TODO: will be completely removed since the userId will be extracted from JWT
+
 @Getter
 @Setter
 @NoArgsConstructor

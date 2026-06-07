@@ -25,4 +25,6 @@ public interface DeckRepository extends JpaRepository<Deck, Long> {
   Optional<Deck> findByDeckIdWithCards(@Param("deckId") UUID deckId);
 
   List<Deck> findAllByParentDeck(Deck parentDeck);
+
+  boolean existsByUser(User user);
 }

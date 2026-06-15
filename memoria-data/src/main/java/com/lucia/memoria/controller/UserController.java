@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -101,15 +100,6 @@ public class UserController {
     return ResponseEntity.ok().body(deckService.getDecksByUserId(userId));
   }
 
-  @Tag(name = "create")
-  @PostMapping("/{userId}/tags")
-  public ResponseEntity<TagDTO> createTag(@PathVariable("userId") UUID userId, @RequestBody TagDTO tagDTO) {
-    TagDTO created = tagService.createTag(userId, tagDTO);
-    URI location = URI.create("/tags/" + created.id());
-    return ResponseEntity.created(location).body(created);
-  }
-
-  @Tag(name = "find")
   @GetMapping("/{userId}/tags")
   public ResponseEntity<List<TagDTO>> getUserTags(@PathVariable("userId") UUID userId) {
     return ResponseEntity.ok().body(tagService.getAllUserTags(userId));

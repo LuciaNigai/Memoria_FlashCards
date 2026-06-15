@@ -17,6 +17,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,7 +62,7 @@ public class Card {
       joinColumns = @JoinColumn(name = "card_id"),
       inverseJoinColumns = @JoinColumn(name = "tag_id")
   )
-  private Set<Tag> tags;
+  private Set<Tag> tags = new HashSet<>();
 
   public Card(Deck deck, Template template) {
     this.cardId = UUID.randomUUID();
@@ -72,6 +73,16 @@ public class Card {
   public void addField(Field field) {
     fields.add(field);
     field.setCard(this);
+  }
+
+  public void addTag(Tag tag) {
+    this.tags.add(tag);
+    tag.getCards().add(this);
+  }
+
+  public void removeTag(Tag tag){
+    this.tags.remove(tag);
+    tag.getCards().remove(this);
   }
 
   public void syncFields(List<FieldMinimalDTO> dtos, Map<UUID, TemplateField> templateFields) {

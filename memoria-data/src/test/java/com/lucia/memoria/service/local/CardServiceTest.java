@@ -7,6 +7,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.lucia.memoria.dto.local.CardRequestDTO;
@@ -26,6 +28,7 @@ import com.lucia.memoria.mapper.TemplateFieldMapper;
 import com.lucia.memoria.model.Card;
 import com.lucia.memoria.model.Deck;
 import com.lucia.memoria.model.Field;
+import com.lucia.memoria.model.Tag;
 import com.lucia.memoria.model.Template;
 import com.lucia.memoria.model.TemplateField;
 import com.lucia.memoria.repository.CardRepository;
@@ -52,6 +55,8 @@ class CardServiceTest {
   @Mock
   private CardRepository cardRepository;
   @Mock
+  private TagService tagService;
+  @Mock
   private DeckService deckService;
   @Mock
   private TemplateService templateService;
@@ -72,21 +77,28 @@ class CardServiceTest {
   private UUID deckId;
   private UUID templateId;
   private UUID cardId;
+  private UUID tagId;
   private Deck deck;
   private Template template;
   private Card card;
   private CardRequestDTO cardRequestDTO;
   private CardResponseDTO cardResponseDTO;
+  private Tag tag;
 
   @BeforeEach
   void setUp() {
     deckId = UUID.randomUUID();
     templateId = UUID.randomUUID();
     cardId = UUID.randomUUID();
+    tagId = UUID.randomUUID();
 
     deck = new Deck();
+
     template = new Template();
     template.setFields(new ArrayList<>());
+
+    tag = new Tag();
+    tag.setTagId(tagId);
     
     card = new Card(deck, template);
     card.setCardId(cardId);
@@ -99,6 +111,11 @@ class CardServiceTest {
     cardResponseDTO = new CardResponseDTO();
     cardResponseDTO.setId(cardId);
   }
+
+
+  // ==========================================
+  // Tests for createCard(CardDTO cardRequestDTO, boolean saveDuplicates)
+  // ==========================================
 
   @ParameterizedTest
   @ValueSource(booleans = {true,false})
@@ -167,6 +184,11 @@ class CardServiceTest {
     assertThrows(NotFoundException.class, () -> cardService.createCard(cardRequestDTO, false));
   }
 
+
+  // ==========================================
+  // Tests for updateCard(UUID cardId, CardRequestDTO cardRequestDTO, boolean saveDuplicates)
+  // ==========================================
+
   @Test
   @DisplayName("Should successfully update a card")
   void updateCard_success() {
@@ -199,6 +221,10 @@ class CardServiceTest {
     assertNotNull(result);
     verify(cardRepository).save(card);
   }
+
+  // ==========================================
+  // Tests for getCardById(UUID cardId)
+  // ==========================================
 
   @Test
   @DisplayName("Should successfully get a card by ID with all possible template fields")
@@ -261,6 +287,10 @@ class CardServiceTest {
     assertThrows(NotFoundException.class, () -> cardService.getCardById(cardId));
   }
 
+  // ==========================================
+  // Tests for getDeckWithCards(UUID deckId)
+  // ==========================================
+
   @Test
   @DisplayName("Should successfully retrieve a deck with all its cards")
   void getDeckWithCards_success() {
@@ -280,6 +310,10 @@ class CardServiceTest {
     verify(deckService).getDeckEntityById(deckId);
     verify(cardRepository).findAllByDeck(deck);
   }
+
+  // ==========================================
+  // Tests for deleteCard(UUID cardId)
+  // ==========================================
 
   @Test
   @DisplayName("Should successfully delete a card")
@@ -302,5 +336,54 @@ class CardServiceTest {
 
     // Act & Assert
     assertThrows(NotFoundException.class, () -> cardService.deleteCard(cardId));
+  }
+
+  // ==========================================
+  // Tests for attachTag(UUID cardId, UUID tagId)
+  // ==========================================
+
+  @Test
+  @DisplayName("Should attach a tag to a card")
+  void attachTagToCard_success() {
+    //Arrange
+    when(cardRepository.findByCardId(cardId)).thenReturn(Optional.of(card));
+    when(tagService.findTagEntityById(tagId)).thenReturn(tag);
+
+    // Act
+    cardService.attachTag(cardId, tagId);
+
+    //Assert
+    verify(cardRepository).save(card);
+  }
+
+  @Test
+  @DisplayName("Should throw not found exception when card does not exist.")
+  void attachTag_cardNotFound_throwsNotFoundException() {
+    // Arrange
+    when(cardRepository.findByCardId(cardId)).thenReturn(Optional.empty());
+
+    // Act
+    assertThrows(NotFoundException.class, () -> cardService.attachTag(cardId, tagId));
+
+    //Assert
+    verifyNoInteractions(tagService);
+    verifyNoMoreInteractions(cardRepository);
+  }
+
+  @Test
+  @DisplayName(("Should throw not found exception when tag does not exist."))
+  void attachTag_tagNotFound_throwsNotFoundException() {
+    // Arrange
+    when(cardRepository.findByCardId(cardId)).thenReturn(Optional.of(card));
+    when(tagService.findTagEntityById(tagId))
+        .thenThrow(new NotFoundException("Tag not found"));
+
+    // Act
+    assertThrows(NotFoundException.class, () -> {
+      cardService.attachTag(cardId, tagId);
+    });
+
+    // Assert
+    verifyNoMoreInteractions(cardRepository);
   }
 }

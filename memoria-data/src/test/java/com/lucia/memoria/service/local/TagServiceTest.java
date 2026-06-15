@@ -64,6 +64,10 @@ class TagServiceTest {
     tagDTO = new TagDTO(tagId, "Test Tag", "#FFFFFF");
   }
 
+  // ==========================================
+  // Tests for createTag(UUID userId, TagDTO tagDTO)
+  // ==========================================
+
   @Test
   @DisplayName("Should successfully create a new tag")
   void createTag_success() {
@@ -74,7 +78,7 @@ class TagServiceTest {
     when(tagMapper.toDTO(any(Tag.class))).thenReturn(tagDTO);
 
     // Act
-    TagDTO result = tagService.createTag(userId, new TagDTO(null, "Test Tag", "#FFFFFF"));
+    TagDTO result = tagService.createTag(userId, tagDTO);
 
     // Assert
     assertNotNull(result);
@@ -94,13 +98,17 @@ class TagServiceTest {
 
     // Act & Assert
     DuplicateException thrown = assertThrows(DuplicateException.class,
-        () -> tagService.createTag(userId, new TagDTO(null, "Test Tag", "#FFFFFF")));
+        () -> tagService.createTag(userId, tagDTO));
 
     assertEquals("The tag with that name already exists", thrown.getMessage());
     verify(userService).getUserEntityById(userId);
     verify(tagRepository).findByName("Test Tag");
     verify(tagRepository, never()).save(any(Tag.class));
   }
+
+  // ==========================================
+  // Tests for getAllUserTags(UUID userId)
+  // ==========================================
 
   @Test
   @DisplayName("Should successfully retrieve all tags for a user")
@@ -125,6 +133,10 @@ class TagServiceTest {
     verify(tagRepository).findByUser(user);
     verify(tagMapper).toDTOList(tags);
   }
+
+  // ==========================================
+  // Tests for deleteTag(UUID tagId, boolean force)
+  // ==========================================
 
   @Test
   @DisplayName("Should successfully delete a tag when it has no associated cards")
@@ -202,6 +214,10 @@ class TagServiceTest {
     verify(tagRepository).findByTagId(tagId);
     verify(tagRepository).delete(tag);
   }
+
+  // ==========================================
+  // Tests for renameTag(UUID tagId, String newName)
+  // ==========================================
 
   @Test
   @DisplayName("Should successfully rename a tag")
@@ -291,5 +307,69 @@ class TagServiceTest {
     verify(tagRepository).findByTagId(tagId);
     verify(tagRepository).findByName(newName);
     verify(tagRepository, never()).save(any(Tag.class));
+  }
+
+  // ==========================================
+  // Tests for findByTagEntityId(UUID tagId)
+  // ==========================================
+
+
+  @Test
+  @DisplayName("Should return Tag entity when it exists")
+  void findTagEntityById_success() {
+    // Arrange
+    when(tagRepository.findByTagId(tagId)).thenReturn(Optional.of(tag));
+
+    // Act
+    Tag result = tagService.findTagEntityById(tagId);
+
+    // Assert
+    assertNotNull(result);
+    assertEquals(tag, result);
+  }
+
+  @Test
+  @DisplayName("Should throw NotFoundException when Tag entity does not exist")
+  void findTagEntityById_notFound_throwsNotFoundException() {
+    // Arrange
+    when(tagRepository.findByTagId(tagId)).thenReturn(Optional.empty());
+
+    // Act & Assert
+    assertThrows(NotFoundException.class, () -> tagService.findTagEntityById(tagId));
+  }
+
+  // ==========================================
+  // Tests for findByTagId(UUID tagId)
+  // ==========================================
+
+  @Test
+  @DisplayName("Should return TagDTO when Tag exists")
+  void findByTagId_success() {
+    // Arrange
+    TagDTO expectedDto = new TagDTO(tagId, "testName", "testColor");
+
+    // Stub both the repository call (used internally) and the mapper
+    when(tagRepository.findByTagId(tagId)).thenReturn(Optional.of(tag));
+    when(tagMapper.toDTO(tag)).thenReturn(expectedDto);
+
+    // Act
+    TagDTO result = tagService.findByTagId(tagId);
+
+    // Assert
+    assertNotNull(result);
+    assertEquals(expectedDto, result);
+  }
+
+  @Test
+  @DisplayName("Should propagate NotFoundException when mapped method fails")
+  void findByTagId_notFound_throwsNotFoundException() {
+    // Arrange
+    when(tagRepository.findByTagId(tagId)).thenReturn(Optional.empty());
+
+    // Act & Assert
+    assertThrows(NotFoundException.class, () -> tagService.findByTagId(tagId));
+
+    // Assert mapper was never touched because exception happened first
+    verifyNoInteractions(tagMapper);
   }
 }

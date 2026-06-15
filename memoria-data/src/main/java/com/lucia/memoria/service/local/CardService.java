@@ -14,6 +14,7 @@ import com.lucia.memoria.mapper.TemplateFieldMapper;
 import com.lucia.memoria.model.Card;
 import com.lucia.memoria.model.Deck;
 import com.lucia.memoria.model.Field;
+import com.lucia.memoria.model.Tag;
 import com.lucia.memoria.model.Template;
 import com.lucia.memoria.model.TemplateField;
 import com.lucia.memoria.repository.CardRepository;
@@ -38,6 +39,7 @@ public class CardService {
   private final CardRepository cardRepository;
   private final DeckService deckService;
   private final TemplateService templateService;
+  private final TagService tagService;
   private final CardMapper cardMapper;
   private final FieldMapper fieldMapper;
   private final TemplateFieldMapper templateFieldMapper;
@@ -136,6 +138,15 @@ public class CardService {
     cardRepository.delete(card);
   }
 
+  @Transactional
+  public void attachTag(UUID cardId, UUID tagId) {
+    Card card = cardRepository.findByCardId(cardId).
+        orElseThrow(() -> new NotFoundException("The card not found"));
+    Tag tag = tagService.findTagEntityById(tagId);
+    card.addTag(tag);
+    cardRepository.save(card);
+  }
+
   private List<FieldDTO> buildFullFields(Card card, List<TemplateField> templateFields) {
     return templateFields.stream()
         .map(templateField -> {
@@ -155,6 +166,5 @@ public class CardService {
         .orElse(FieldDTO.blankWithTemplate(templateFieldMapper.toDTO(templateField)));
   }
 
-  // TODO: implement attach tag
   // TODO: implement detach tag
 }

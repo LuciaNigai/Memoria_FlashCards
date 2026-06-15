@@ -109,6 +109,26 @@ public class CardController {
     return ResponseEntity.ok().body(new GeneralResponseDTO<>("Card deleted successfully."));
   }
 
-  // TODO: implement attach tag
+  @Tag(name = "update")
+  @Operation(summary = "Attach tag", description = "Attach a tag to the card.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Attaches tag to the card", content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = GeneralResponseDTO.class))
+      }),
+      @ApiResponse(responseCode = "404", description = "Card not found", content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = GeneralResponseDTO.class))
+      }),
+      @ApiResponse(responseCode = "404", description = "Tag not found", content = {
+          @Content(mediaType = "application/json", schema = @Schema(implementation = GeneralResponseDTO.class))
+      })
+  })
+
+  @PatchMapping("/{cardId}/{tagId}")
+  public ResponseEntity<GeneralResponseDTO<Void>> attachTag(@PathVariable("cardId") UUID cardId,
+      @PathVariable("tagId") UUID tagId) {
+    cardService.attachTag(cardId, tagId);
+    return ResponseEntity.ok().body((new GeneralResponseDTO<>("Tag attached successfully.")));
+  }
+
   // TODO: implement detach tag
 }

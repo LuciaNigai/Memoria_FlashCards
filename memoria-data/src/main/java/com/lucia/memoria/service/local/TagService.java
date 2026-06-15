@@ -49,6 +49,7 @@ public class TagService {
     return tagMapper.toDTOList(tags);
   }
 
+
   @Transactional
   public void deleteTag(UUID tagId, boolean force) {
     Tag tag = tagRepository.findByTagId(tagId)
@@ -78,6 +79,18 @@ public class TagService {
     }
     tag.setName(normalizedName);
     return tagMapper.toDTO(tagRepository.save(tag));
+  }
+
+  @Transactional(readOnly = true)
+  public TagDTO findByTagId(UUID tagId)  {
+    return tagMapper.toDTO(findTagEntityById(tagId));
+  }
+
+
+  public Tag findTagEntityById(UUID tagId)  {
+    Tag tag = tagRepository.findByTagId(tagId)
+        .orElseThrow(() -> new NotFoundException("Tag not found."));
+    return tag;
   }
 
   private void checkForDuplicates(String name) {

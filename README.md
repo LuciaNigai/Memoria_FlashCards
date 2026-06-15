@@ -1,26 +1,13 @@
 ## Memoria – Dockerized Microservices Setup
 
-This repository contains a docker-compose.yaml file to set up and run four services that are part of the Memoria application.
+This repository contains 3 services, a gateway and a docker-compose.yaml file to set up and run the services that are part of the Memoria application.
+
 ### Prerequisites
 
 Docker must be installed on your machine to run the application in a production-like environment using containers.
 
 ### How to Run the App
-
-1. Create a parent folder to hold all Memoria services and this repository.
-
-2. Clone this repository into that folder.
-
-3. Inside the same folder, clone the following repositories:
-
-https://github.com/LuciaNigai/memoria-gateway
-
-https://github.com/LuciaNigai/memoria-auth
-
-https://github.com/LuciaNigai/memoria-data
-
-https://github.com/LuciaNigai/memoria-training
-
+1. Clone this repository into that folder.
 
 Your directory structure should now look like this:
 

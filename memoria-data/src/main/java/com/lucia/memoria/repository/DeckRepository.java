@@ -2,11 +2,10 @@ package com.lucia.memoria.repository;
 
 import com.lucia.memoria.model.Deck;
 import com.lucia.memoria.model.User;
-import java.util.UUID;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 

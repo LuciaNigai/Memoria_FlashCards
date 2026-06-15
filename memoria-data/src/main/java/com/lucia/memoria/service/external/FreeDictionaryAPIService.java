@@ -6,14 +6,13 @@ import com.lucia.memoria.exception.ClientApiException;
 import com.lucia.memoria.exception.ServerApiException;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 import reactor.util.retry.Retry;
 
 @Service

@@ -1,10 +1,8 @@
 package com.lucia.memoria.service.local;
 
-import com.lucia.memoria.dto.local.DeckResponseDTO;
 import com.lucia.memoria.dto.local.UserDTO;
 import com.lucia.memoria.exception.ConflictWithDataException;
 import com.lucia.memoria.mapper.UserMapper;
-import com.lucia.memoria.model.Deck;
 import com.lucia.memoria.model.User;
 import com.lucia.memoria.repository.DeckRepository;
 import com.lucia.memoria.repository.UserRepository;

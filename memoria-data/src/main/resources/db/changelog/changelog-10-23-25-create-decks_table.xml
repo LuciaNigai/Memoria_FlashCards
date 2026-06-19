@@ -36,6 +36,12 @@
       <column name="path" type="VARCHAR(1000)">
         <constraints nullable="true"/>
       </column>
+      <column name="created_at" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
 
     <addForeignKeyConstraint

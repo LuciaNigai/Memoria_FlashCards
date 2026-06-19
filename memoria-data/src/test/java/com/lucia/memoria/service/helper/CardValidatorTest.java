@@ -3,7 +3,7 @@ package com.lucia.memoria.service.helper;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
 
-import com.lucia.memoria.dto.local.FieldMinimalDTO;
+import com.lucia.memoria.dto.local.FieldRequestDTO;
 import com.lucia.memoria.exception.ConflictWithDataException;
 import com.lucia.memoria.exception.DuplicateException;
 import com.lucia.memoria.helper.FieldRole;
@@ -38,44 +38,44 @@ class CardValidatorTest {
   @ValueSource(booleans = {true, false})
   @DisplayName("Should not throw exception when duplicates does not exist.")
   void validateDuplicates_DoesNotHaveDuplicates_existsCleanly(boolean saveDuplicateFlag) {
-    FieldMinimalDTO fieldMinimalDTO = new FieldMinimalDTO();
-    fieldMinimalDTO.setContent("test content");
+    FieldRequestDTO fieldRequestDTO = new FieldRequestDTO();
+    fieldRequestDTO.setContent("test content");
 
     doReturn(Collections.emptyList())
         .when(cardRepository)
-        .findCardIdsByFieldRoleAndContent(FieldRole.FRONT, fieldMinimalDTO.getContent());
+        .findCardIdsByFieldRoleAndContent(FieldRole.FRONT, fieldRequestDTO.getContent());
 
     assertDoesNotThrow(() ->
-        cardValidator.validateDuplicates(fieldMinimalDTO, saveDuplicateFlag, null,
+        cardValidator.validateDuplicates(fieldRequestDTO, saveDuplicateFlag, null,
             FieldRole.FRONT));
   }
 
   @Test
   @DisplayName("Should not throw exception when duplicate exists but saveDuplicate is true")
   void validateDuplicates_hasDuplicatesButAllowed_exitsCleanly() {
-    FieldMinimalDTO fieldMinimalDTO = new FieldMinimalDTO();
-    fieldMinimalDTO.setContent("test content");
+    FieldRequestDTO fieldRequestDTO = new FieldRequestDTO();
+    fieldRequestDTO.setContent("test content");
 
     doReturn(List.of(UUID.randomUUID()))
         .when(cardRepository)
-        .findCardIdsByFieldRoleAndContent(FieldRole.FRONT, fieldMinimalDTO.getContent());
+        .findCardIdsByFieldRoleAndContent(FieldRole.FRONT, fieldRequestDTO.getContent());
 
     assertDoesNotThrow(() ->
-        cardValidator.validateDuplicates(fieldMinimalDTO, true, null, FieldRole.FRONT));
+        cardValidator.validateDuplicates(fieldRequestDTO, true, null, FieldRole.FRONT));
   }
 
   @Test
   @DisplayName("Should throw an exception when duplicate exists and saveDuplicate is false")
   void validateDuplicates_hasDuplicatesAndNotAllowed_throwsException() {
-    FieldMinimalDTO fieldMinimalDTO = new FieldMinimalDTO();
-    fieldMinimalDTO.setContent("test content");
+    FieldRequestDTO fieldRequestDTO = new FieldRequestDTO();
+    fieldRequestDTO.setContent("test content");
 
     doReturn(List.of(UUID.randomUUID()))
         .when(cardRepository)
-        .findCardIdsByFieldRoleAndContent(FieldRole.FRONT, fieldMinimalDTO.getContent());
+        .findCardIdsByFieldRoleAndContent(FieldRole.FRONT, fieldRequestDTO.getContent());
 
     assertThrows(DuplicateException.class,
-        () -> cardValidator.validateDuplicates(fieldMinimalDTO, false, null, FieldRole.FRONT));
+        () -> cardValidator.validateDuplicates(fieldRequestDTO, false, null, FieldRole.FRONT));
   }
 
   @Test

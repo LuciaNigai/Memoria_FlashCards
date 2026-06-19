@@ -2,9 +2,9 @@ package com.lucia.memoria.service.local;
 
 import com.lucia.memoria.dto.local.CardRequestDTO;
 import com.lucia.memoria.dto.local.CardResponseDTO;
-import com.lucia.memoria.dto.local.FieldDTO;
-import com.lucia.memoria.dto.local.FieldMinimalDTO;
-import com.lucia.memoria.dto.local.ResponseDeckWithCardsDTO;
+import com.lucia.memoria.dto.local.DeckWithCardsResponseDTO;
+import com.lucia.memoria.dto.local.FieldRequestDTO;
+import com.lucia.memoria.dto.local.FieldResponseDTO;
 import com.lucia.memoria.exception.NotFoundException;
 import com.lucia.memoria.helper.FieldRole;
 import com.lucia.memoria.mapper.CardMapper;
@@ -60,7 +60,7 @@ public class CardService {
     Map<UUID, TemplateField> templateFields = template.getFields().stream()
         .collect(Collectors.toMap(TemplateField::getTemplateFieldId, Function.identity()));
 
-    List<FieldMinimalDTO> fieldDTOs = Optional.ofNullable(cardDTO.getFields())
+    List<FieldRequestDTO> fieldDTOs = Optional.ofNullable(cardDTO.getFields())
         .orElse(Collections.emptyList());
 
     fieldDTOs.forEach(dto -> {
@@ -101,6 +101,7 @@ public class CardService {
 
     // 5. Business Rules & save
     cardValidator.validateCardStructure(card);
+    card.touch();
     return cardMapper.toResponseDTO(cardRepository.save(card));
   }
 
@@ -115,7 +116,7 @@ public class CardService {
 
     // 2. Build the "Full" list (Existing fields + Blank fields from template)
     List<TemplateField> allPossibleFields = card.getTemplate().getFields();
-    List<FieldDTO> fullFields = buildFullFields(card, allPossibleFields);
+    List<FieldResponseDTO> fullFields = buildFullFields(card, allPossibleFields);
 
     // 3. Manually set it
     cardResponseDTO.setFields(fullFields);
@@ -124,7 +125,7 @@ public class CardService {
   }
 
   @Transactional(readOnly = true)
-  public ResponseDeckWithCardsDTO getDeckWithCards(UUID deckId) {
+  public DeckWithCardsResponseDTO getDeckWithCards(UUID deckId) {
     Deck deck = deckService.getDeckEntityById(deckId);
     List<Card> cards = cardRepository.findAllByDeck(deck);
 
@@ -147,7 +148,7 @@ public class CardService {
     cardRepository.save(card);
   }
 
-  private List<FieldDTO> buildFullFields(Card card, List<TemplateField> templateFields) {
+  private List<FieldResponseDTO> buildFullFields(Card card, List<TemplateField> templateFields) {
     return templateFields.stream()
         .map(templateField -> {
           Field field = card.getFieldByTemplateId(templateField.getTemplateFieldId()).orElse(null);
@@ -155,15 +156,15 @@ public class CardService {
         }).toList();
   }
 
-  private FieldDTO convertOrCreateBlankFieldDTO(TemplateField templateField,
+  private FieldResponseDTO convertOrCreateBlankFieldDTO(TemplateField templateField,
       Field field) {
     return Optional.ofNullable(field)
         .map(f -> {
-          FieldDTO fieldDTO = fieldMapper.toDTO(f);
+          FieldResponseDTO fieldDTO = fieldMapper.toDTO(f);
           fieldDTO.setTemplateField(templateFieldMapper.toDTO(templateField));
           return fieldDTO;
         })
-        .orElse(FieldDTO.blankWithTemplate(templateFieldMapper.toDTO(templateField)));
+        .orElse(FieldResponseDTO.blankWithTemplate(templateFieldMapper.toDTO(templateField)));
   }
 
   // TODO: implement detach tag

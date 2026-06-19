@@ -2,8 +2,8 @@ package com.lucia.memoria.controller;
 
 import com.lucia.memoria.dto.local.DeckResponseDTO;
 import com.lucia.memoria.dto.local.GeneralResponseDTO;
-import com.lucia.memoria.dto.local.TagDTO;
-import com.lucia.memoria.dto.local.TemplateDTO;
+import com.lucia.memoria.dto.local.TagResponseDTO;
+import com.lucia.memoria.dto.local.TemplateResponseDTO;
 import com.lucia.memoria.dto.local.UserDTO;
 import com.lucia.memoria.service.local.DeckService;
 import com.lucia.memoria.service.local.TagService;
@@ -60,7 +60,7 @@ public class UserController {
           @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))}),
       @ApiResponse(responseCode = "400", description = "User not found", content = @Content)})
   @DeleteMapping("/{userId}")
-  public ResponseEntity<GeneralResponseDTO> deleteUser(@PathVariable("userId") UUID userId,
+  public ResponseEntity<GeneralResponseDTO<Void>> deleteUser(@PathVariable("userId") UUID userId,
       @RequestParam(name = "force", defaultValue = "false") boolean force) {
     userService.deleteUser(userId, force);
     return ResponseEntity.ok().body(new GeneralResponseDTO<>("User deleted successfully."));
@@ -90,7 +90,7 @@ public class UserController {
 
   @Tag(name = "find")
   @GetMapping("/{userId}/templates")
-  public ResponseEntity<List<TemplateDTO>> getUserTemplates(@PathVariable("userId") UUID userId) {
+  public ResponseEntity<List<TemplateResponseDTO>> getUserTemplates(@PathVariable("userId") UUID userId) {
     return ResponseEntity.ok().body(templateService.getTemplatesByUserId(userId));
   }
 
@@ -101,7 +101,7 @@ public class UserController {
   }
 
   @GetMapping("/{userId}/tags")
-  public ResponseEntity<List<TagDTO>> getUserTags(@PathVariable("userId") UUID userId) {
+  public ResponseEntity<List<TagResponseDTO>> getUserTags(@PathVariable("userId") UUID userId) {
     return ResponseEntity.ok().body(tagService.getAllUserTags(userId));
   }
 }

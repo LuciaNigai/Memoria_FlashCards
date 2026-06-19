@@ -8,7 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 
-@Mapper(componentModel = "spring", uses = {FieldMapper.class})
+@Mapper(uses = {FieldMapper.class})
 public interface CardMapper {
 
   @Mapping(target = "templateId", source = "template.templateId")

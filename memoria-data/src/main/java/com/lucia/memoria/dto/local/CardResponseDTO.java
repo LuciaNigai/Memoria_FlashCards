@@ -1,8 +1,7 @@
 package com.lucia.memoria.dto.local;
 
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -18,10 +17,9 @@ import lombok.Setter;
 public class CardResponseDTO {
 
   private UUID id;
-  @NotNull
   private UUID deckId;
-  @NotNull
   private UUID templateId;
-  @NotEmpty
-  private List<FieldDTO> fields = new ArrayList<>();
+  private List<FieldResponseDTO> fields = new ArrayList<>();
+  private OffsetDateTime createdAt;
+  private OffsetDateTime updatedAt;
 }

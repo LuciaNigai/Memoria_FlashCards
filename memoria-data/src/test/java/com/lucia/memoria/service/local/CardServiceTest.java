@@ -13,10 +13,10 @@ import static org.mockito.Mockito.when;
 
 import com.lucia.memoria.dto.local.CardRequestDTO;
 import com.lucia.memoria.dto.local.CardResponseDTO;
-import com.lucia.memoria.dto.local.FieldDTO;
-import com.lucia.memoria.dto.local.FieldMinimalDTO;
-import com.lucia.memoria.dto.local.ResponseDeckWithCardsDTO;
-import com.lucia.memoria.dto.local.TemplateFieldDTO;
+import com.lucia.memoria.dto.local.DeckWithCardsResponseDTO;
+import com.lucia.memoria.dto.local.FieldRequestDTO;
+import com.lucia.memoria.dto.local.FieldResponseDTO;
+import com.lucia.memoria.dto.local.TemplateFieldResponseDTO;
 import com.lucia.memoria.exception.NotFoundException;
 import com.lucia.memoria.helper.FieldRole;
 import com.lucia.memoria.helper.FieldType;
@@ -129,7 +129,7 @@ class CardServiceTest {
     tf.setFieldRole(FieldRole.FRONT);
     template.getFields().add(tf);
 
-    FieldMinimalDTO fieldDto = new FieldMinimalDTO();
+    FieldRequestDTO fieldDto = new FieldRequestDTO();
     fieldDto.setTemplateFieldId(templateFieldId);
     fieldDto.setContent("Test Content");
     cardRequestDTO.getFields().add(fieldDto);
@@ -173,7 +173,7 @@ class CardServiceTest {
   void createCard_templateFieldNotFound_throwsNotFoundException() {
     // Arrange
     UUID unknownTemplateFieldId = UUID.randomUUID();
-    FieldMinimalDTO fieldDto = new FieldMinimalDTO();
+    FieldRequestDTO fieldDto = new FieldRequestDTO();
     fieldDto.setTemplateFieldId(unknownTemplateFieldId);
     cardRequestDTO.getFields().add(fieldDto);
 
@@ -237,7 +237,7 @@ class CardServiceTest {
 
     when(cardRepository.findByCardIdWithFieldsAndFieldTemplates(cardId)).thenReturn(Optional.of(card));
     when(cardMapper.toResponseDTO(card)).thenReturn(cardResponseDTO);
-    when(templateFieldMapper.toDTO(tf)).thenReturn(new TemplateFieldDTO());
+    when(templateFieldMapper.toDTO(tf)).thenReturn(new TemplateFieldResponseDTO());
 
     // Act
     CardResponseDTO result = cardService.getCardById(cardId);
@@ -265,9 +265,9 @@ class CardServiceTest {
     when(cardRepository.findByCardIdWithFieldsAndFieldTemplates(cardId)).thenReturn(Optional.of(card));
     when(cardMapper.toResponseDTO(card)).thenReturn(cardResponseDTO);
     
-    FieldDTO fieldDto = new FieldDTO();
+    FieldResponseDTO fieldDto = new FieldResponseDTO();
     when(fieldMapper.toDTO(field)).thenReturn(fieldDto);
-    when(templateFieldMapper.toDTO(tf)).thenReturn(new TemplateFieldDTO());
+    when(templateFieldMapper.toDTO(tf)).thenReturn(new TemplateFieldResponseDTO());
 
     // Act
     CardResponseDTO result = cardService.getCardById(cardId);
@@ -296,14 +296,14 @@ class CardServiceTest {
   void getDeckWithCards_success() {
     // Arrange
     List<Card> cards = Collections.singletonList(card);
-    ResponseDeckWithCardsDTO expectedResponse = new ResponseDeckWithCardsDTO();
+    DeckWithCardsResponseDTO expectedResponse = new DeckWithCardsResponseDTO();
 
     when(deckService.getDeckEntityById(deckId)).thenReturn(deck);
     when(cardRepository.findAllByDeck(deck)).thenReturn(cards);
     when(deckWithCardsMapper.toDTO(deck, cards)).thenReturn(expectedResponse);
 
     // Act
-    ResponseDeckWithCardsDTO result = cardService.getDeckWithCards(deckId);
+    DeckWithCardsResponseDTO result = cardService.getDeckWithCards(deckId);
 
     // Assert
     assertNotNull(result);
@@ -379,9 +379,7 @@ class CardServiceTest {
         .thenThrow(new NotFoundException("Tag not found"));
 
     // Act
-    assertThrows(NotFoundException.class, () -> {
-      cardService.attachTag(cardId, tagId);
-    });
+    assertThrows(NotFoundException.class, () -> cardService.attachTag(cardId, tagId));
 
     // Assert
     verifyNoMoreInteractions(cardRepository);

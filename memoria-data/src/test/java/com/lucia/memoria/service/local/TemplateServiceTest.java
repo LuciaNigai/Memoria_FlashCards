@@ -1,10 +1,17 @@
 package com.lucia.memoria.service.local;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import com.lucia.memoria.dto.local.TemplateDTO;
-import com.lucia.memoria.dto.local.TemplateFieldDTO;
+import com.lucia.memoria.dto.local.TemplateFieldRequestDTO;
+import com.lucia.memoria.dto.local.TemplateRequestDTO;
+import com.lucia.memoria.dto.local.TemplateResponseDTO;
 import com.lucia.memoria.exception.ConflictWithDataException;
 import com.lucia.memoria.exception.NotFoundException;
 import com.lucia.memoria.helper.FieldRole;
@@ -59,7 +66,8 @@ class TemplateServiceTest {
   private User user;
   private UUID templateId;
   private Template template;
-  private TemplateDTO templateDTO;
+  private TemplateResponseDTO templateResponseDTO;
+  private TemplateRequestDTO templateRequestDTO;
 
   @BeforeEach
   void setUp() {
@@ -73,58 +81,63 @@ class TemplateServiceTest {
     template.setName("Standard Vocabulary");
     template.setOwner(user);
 
-    templateDTO = new TemplateDTO();
-    templateDTO.setName("Standard Vocabulary");
-    templateDTO.setOwnerId(userId);
-    templateDTO.setFields(new ArrayList<>());
+    templateRequestDTO = new TemplateRequestDTO();
+    templateRequestDTO.setName("Standard Vocabulary");
+    templateRequestDTO.setOwnerId(userId);
+    templateRequestDTO.setFields(new ArrayList<>());
+
+    templateResponseDTO = new TemplateResponseDTO();
+    templateResponseDTO.setName("Standard Vocabulary");
+    templateResponseDTO.setOwnerId(userId);
+    templateResponseDTO.setFields(new ArrayList<>());
   }
 
   @Test
   @DisplayName("Should successfully create a new template")
   void createTemplate_success() {
-    // Arrange
-    TemplateFieldDTO fieldDTO = new TemplateFieldDTO();
-    fieldDTO.setName("Word");
-    fieldDTO.setFieldRole(FieldRole.FRONT);
-    templateDTO.getFields().add(fieldDTO);
+    // Arrange - Fields array list is already initialized by @BeforeEach
+    TemplateFieldRequestDTO fieldRequestDTO = new TemplateFieldRequestDTO();
+    fieldRequestDTO.setName("Word");
+    fieldRequestDTO.setFieldRole(FieldRole.FRONT);
+    templateRequestDTO.getFields().add(fieldRequestDTO);
 
     TemplateField fieldEntity = new TemplateField();
     fieldEntity.setName("Word");
 
     when(userService.getUserEntityById(userId)).thenReturn(user);
-    when(templateRepository.findByNameAndOwner(templateDTO.getName(), user))
+    when(templateRepository.findByNameAndOwner("Standard Vocabulary", user))
         .thenReturn(Optional.empty());
-    when(templateFieldMapper.toEntity(any(TemplateFieldDTO.class))).thenReturn(fieldEntity);
+    when(templateFieldMapper.toEntity(any(TemplateFieldRequestDTO.class))).thenReturn(fieldEntity);
     when(templateRepository.save(any(Template.class))).thenReturn(template);
-    when(templateMapper.toDTO(any(Template.class))).thenReturn(templateDTO);
+    when(templateMapper.toDTO(any(Template.class))).thenReturn(templateResponseDTO);
 
     // Act
-    TemplateDTO result = templateService.createTemplate(templateDTO);
+    TemplateResponseDTO result = templateService.createTemplate(templateRequestDTO);
 
     // Assert
     assertNotNull(result);
-    assertEquals(templateDTO.getName(), result.getName());
+    assertEquals(templateResponseDTO.getName(), result.getName());
     verify(templateRepository).save(any(Template.class));
-    verify(templateFieldMapper).toEntity(any(TemplateFieldDTO.class));
+    verify(templateFieldMapper).toEntity(any(TemplateFieldRequestDTO.class));
   }
 
   @Test
   @DisplayName("Should add Part of Speech field when requested during template creation")
   void createTemplate_withPartOfSpeech_addsField() {
-    // Arrange
-    templateDTO.setIncludesPartOfSpeech(true);
-    
+    // Arrange - Name and empty fields collection are already handled by @BeforeEach
+    templateRequestDTO.setIncludesPartOfSpeech(true);
+
     when(userService.getUserEntityById(userId)).thenReturn(user);
-    when(templateRepository.findByNameAndOwner(templateDTO.getName(), user))
+    when(templateRepository.findByNameAndOwner("Standard Vocabulary", user))
         .thenReturn(Optional.empty());
     when(templateRepository.save(any(Template.class))).thenAnswer(invocation -> invocation.getArgument(0));
-    when(templateMapper.toDTO(any(Template.class))).thenReturn(templateDTO);
+    when(templateMapper.toDTO(any(Template.class))).thenReturn(templateResponseDTO);
 
     // Act
-    templateService.createTemplate(templateDTO);
+    templateService.createTemplate(templateRequestDTO);
 
     // Assert
-    verify(templateRepository).save(argThat(t -> 
+    verify(templateRepository).save(argThat(t ->
         t.getFields().stream().anyMatch(f -> "Part of Speech".equals(f.getName()))
     ));
   }
@@ -134,12 +147,13 @@ class TemplateServiceTest {
   void createTemplate_duplicateName_throwsIllegalArgumentException() {
     // Arrange
     when(userService.getUserEntityById(userId)).thenReturn(user);
-    when(templateRepository.findByNameAndOwner(templateDTO.getName(), user))
+    when(templateRepository.findByNameAndOwner(templateResponseDTO.getName(), user))
         .thenReturn(Optional.of(template));
 
     // Act & Assert
-    assertThrows(IllegalArgumentException.class, () -> templateService.createTemplate(templateDTO));
-    
+    assertThrows(IllegalArgumentException.class, () -> templateService.createTemplate(
+        templateRequestDTO));
+
     verify(templateRepository, never()).save(any());
   }
 
@@ -148,10 +162,10 @@ class TemplateServiceTest {
   void getTemplateById_success() {
     // Arrange
     when(templateRepository.findByTemplateId(templateId)).thenReturn(Optional.of(template));
-    when(templateMapper.toDTO(template)).thenReturn(templateDTO);
+    when(templateMapper.toDTO(template)).thenReturn(templateResponseDTO);
 
     // Act
-    TemplateDTO result = templateService.getTemplateById(templateId);
+    TemplateResponseDTO result = templateService.getTemplateById(templateId);
 
     // Assert
     assertNotNull(result);
@@ -193,7 +207,7 @@ class TemplateServiceTest {
 
     // Act & Assert
     assertThrows(ConflictWithDataException.class, () -> templateService.deleteTemplate(templateId));
-    
+
     verify(templateRepository, never()).delete(any());
   }
 
@@ -203,13 +217,14 @@ class TemplateServiceTest {
     // Arrange
     when(userService.getUserEntityById(userId)).thenReturn(user);
     when(templateRepository.findAllByOwner(user)).thenReturn(List.of(template));
-    when(templateMapper.toDTOList(any())).thenReturn(List.of(templateDTO));
+    when(templateMapper.toDTOList(any())).thenReturn(List.of(templateResponseDTO));
 
     // Act
-    List<TemplateDTO> results = templateService.getTemplatesByUserId(userId);
+    List<TemplateResponseDTO> result = templateService.getTemplatesByUserId(userId);
 
     // Assert
-    assertEquals(1, results.size());
+    assertNotNull(result);
+    assertEquals(1, result.size());
     verify(templateRepository).findAllByOwner(user);
   }
 }

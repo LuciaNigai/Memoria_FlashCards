@@ -1,6 +1,7 @@
 package com.lucia.memoria.service.local;
 
-import com.lucia.memoria.dto.local.TagDTO;
+import com.lucia.memoria.dto.local.TagRequestDTO;
+import com.lucia.memoria.dto.local.TagResponseDTO;
 import com.lucia.memoria.exception.ConflictWithDataException;
 import com.lucia.memoria.exception.DuplicateException;
 import com.lucia.memoria.exception.NotFoundException;
@@ -28,22 +29,22 @@ public class TagService {
   private final UserService userService;
 
   @Transactional
-  public TagDTO createTag(UUID userId, TagDTO tagDTO) {
+  public TagResponseDTO createTag(UUID userId, TagRequestDTO tagRequestDTO) {
     User user = userService.getUserEntityById(userId);
-    String normalizedName = tagDTO.name().trim();
+    String normalizedName = tagRequestDTO.name().trim();
     checkForDuplicates(normalizedName);
 
     Tag tag = new Tag();
     tag.setTagId(UUID.randomUUID());
     tag.setUser(user);
     tag.setName(normalizedName);
-    tag.setColor(tagDTO.color());
+    tag.setColor(tagRequestDTO.color());
 
     return tagMapper.toDTO(tagRepository.save(tag));
   }
 
   @Transactional(readOnly = true)
-  public List<TagDTO> getAllUserTags(UUID userId) {
+  public List<TagResponseDTO> getAllUserTags(UUID userId) {
     User user = userService.getUserEntityById(userId);
     List<Tag> tags = tagRepository.findByUser(user);
     return tagMapper.toDTOList(tags);
@@ -68,7 +69,7 @@ public class TagService {
   }
 
   @Transactional
-  public TagDTO renameTag(UUID tagId, String name) {
+  public TagResponseDTO renameTag(UUID tagId, String name) {
     Tag tag = tagRepository.findByTagId(tagId)
         .orElseThrow(() -> new NotFoundException("Tag you are trying to rename does not exist"));
     String normalizedName = name.trim();
@@ -82,15 +83,14 @@ public class TagService {
   }
 
   @Transactional(readOnly = true)
-  public TagDTO findByTagId(UUID tagId)  {
+  public TagResponseDTO findByTagId(UUID tagId)  {
     return tagMapper.toDTO(findTagEntityById(tagId));
   }
 
 
   public Tag findTagEntityById(UUID tagId)  {
-    Tag tag = tagRepository.findByTagId(tagId)
+    return tagRepository.findByTagId(tagId)
         .orElseThrow(() -> new NotFoundException("Tag not found."));
-    return tag;
   }
 
   private void checkForDuplicates(String name) {

@@ -2,7 +2,8 @@ package com.lucia.memoria.controller;
 
 import com.lucia.memoria.dto.local.GeneralResponseDTO;
 import com.lucia.memoria.dto.local.RenameRequestDTO;
-import com.lucia.memoria.dto.local.TagDTO;
+import com.lucia.memoria.dto.local.TagRequestDTO;
+import com.lucia.memoria.dto.local.TagResponseDTO;
 import com.lucia.memoria.service.local.TagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,27 +35,27 @@ public class TagController {
   private final TagService tagService;
 
   @PostMapping("/{userId}")
-  public ResponseEntity<TagDTO> createTag(@PathVariable("userId") UUID userId, @RequestBody TagDTO tagDTO) {
+  public ResponseEntity<TagResponseDTO> createTag(@PathVariable("userId") UUID userId, @RequestBody TagRequestDTO tagRequestDTO) {
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(tagService.createTag(userId, tagDTO));
+        .body(tagService.createTag(userId, tagRequestDTO));
   }
 
   @GetMapping("/{tagId}")
-  public ResponseEntity<TagDTO> getTag(@PathVariable("tagId") UUID tagId) {
+  public ResponseEntity<TagResponseDTO> getTag(@PathVariable("tagId") UUID tagId) {
     return ResponseEntity.ok().body(tagService.findByTagId(tagId));
   }
 
   @Operation(summary = "Rename tag", description = "Updates the name of an existing tag.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Tag renamed", content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = TagDTO.class))
+          @Content(mediaType = "application/json", schema = @Schema(implementation = TagRequestDTO.class))
       }),
       @ApiResponse(responseCode = "404", description = "Tag not found", content = {
           @Content(mediaType = "application/json", schema = @Schema(implementation = GeneralResponseDTO.class))
       })
   })
   @PatchMapping("/{tagId}")
-  public ResponseEntity<TagDTO> renameTag(@PathVariable("tagId") UUID tagId, @RequestBody
+  public ResponseEntity<TagResponseDTO> renameTag(@PathVariable("tagId") UUID tagId, @RequestBody
   RenameRequestDTO newName) {
     return ResponseEntity.ok().body(tagService.renameTag(tagId, newName.name()));
   }

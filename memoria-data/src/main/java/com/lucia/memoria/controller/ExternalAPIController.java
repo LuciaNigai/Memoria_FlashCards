@@ -1,6 +1,6 @@
 package com.lucia.memoria.controller;
 
-import com.lucia.memoria.dto.local.CardResponseDTO;
+import com.lucia.memoria.dto.local.CardRequestDTO;
 import com.lucia.memoria.service.external.FreeDictionaryCardService;
 import com.lucia.memoria.service.external.GoogleAPIService;
 import java.util.List;
@@ -22,7 +22,7 @@ public class ExternalAPIController {
 
 
   @GetMapping("/meaning/{word}")
-  public ResponseEntity<List<CardResponseDTO>> getWordDefinition(@PathVariable("word") String word) {
+  public ResponseEntity<List<CardRequestDTO>> getWordDefinition(@PathVariable("word") String word) {
     return ResponseEntity.ok().body(freeDictionaryCardService.generateCards(word));
   }
 

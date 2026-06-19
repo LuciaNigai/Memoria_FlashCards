@@ -1,13 +1,13 @@
 package com.lucia.memoria.mapper;
 
-import com.lucia.memoria.dto.local.ResponseDeckWithCardsDTO;
+import com.lucia.memoria.dto.local.DeckWithCardsResponseDTO;
 import com.lucia.memoria.model.Card;
 import com.lucia.memoria.model.Deck;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Mapper(componentModel = "spring", uses = {DeckMapper.class, CardMapper.class})
+@Mapper(uses = {DeckMapper.class, CardMapper.class})
 public abstract class DeckWithCardsMapper {
 
   private DeckMapper deckMapper;
@@ -23,15 +23,15 @@ public abstract class DeckWithCardsMapper {
     this.cardMapper = cardMapper;
   }
 
-  public ResponseDeckWithCardsDTO toDTO(Deck deck, List<Card> cards) {
+  public DeckWithCardsResponseDTO toDTO(Deck deck, List<Card> cards) {
     if (deck == null) return null;
 
-    ResponseDeckWithCardsDTO dto = new ResponseDeckWithCardsDTO();
-    dto.setDeck(deckMapper.toMinimalDTO(deck));
+    DeckWithCardsResponseDTO dto = new DeckWithCardsResponseDTO();
+    dto.setDeck(deckMapper.toDTO(deck));
 
     if (cards != null) {
       dto.setCards(cards.stream()
-          .map(cardMapper::toRequestDTO)
+          .map(cardMapper::toResponseDTO)
           .toList());
     }
 

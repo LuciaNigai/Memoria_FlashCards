@@ -1,16 +1,16 @@
 package com.lucia.memoria.mapper;
 
-import com.lucia.memoria.dto.local.TagDTO;
+import com.lucia.memoria.dto.local.TagResponseDTO;
 import com.lucia.memoria.model.Tag;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper
 public interface TagMapper {
 
   @Mapping(target = "id", source = "tagId")
-  TagDTO toDTO(Tag tag);
+  TagResponseDTO toDTO(Tag tag);
 
-  List<TagDTO> toDTOList(List<Tag> tags);
+  List<TagResponseDTO> toDTOList(List<Tag> tags);
 }

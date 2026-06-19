@@ -1,7 +1,8 @@
 package com.lucia.memoria.controller;
 
 import com.lucia.memoria.dto.local.GeneralResponseDTO;
-import com.lucia.memoria.dto.local.TemplateDTO;
+import com.lucia.memoria.dto.local.TemplateRequestDTO;
+import com.lucia.memoria.dto.local.TemplateResponseDTO;
 import com.lucia.memoria.service.local.TemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,29 +35,29 @@ public class TemplateController {
   @Operation(summary = "Create new template", description = "Defines a new card template with specific field types.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "201", description = "Created template", content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = TemplateDTO.class))
+          @Content(mediaType = "application/json", schema = @Schema(implementation = TemplateRequestDTO.class))
       }),
       @ApiResponse(responseCode = "400", description = "Invalid template configuration", content = {
           @Content(mediaType = "application/json", schema = @Schema(implementation = GeneralResponseDTO.class))
       })
   })
   @PostMapping
-  public ResponseEntity<TemplateDTO> createTemplate(@RequestBody TemplateDTO templateDTO) {
+  public ResponseEntity<TemplateResponseDTO> createTemplate(@RequestBody TemplateRequestDTO templateRequestDTO) {
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(templateService.createTemplate(templateDTO));
+        .body(templateService.createTemplate(templateRequestDTO));
   }
 
   @Operation(summary = "Get template by id", description = "Returns a template and its field definitions.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Found template", content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = TemplateDTO.class))
+          @Content(mediaType = "application/json", schema = @Schema(implementation = TemplateRequestDTO.class))
       }),
       @ApiResponse(responseCode = "404", description = "Template not found", content = {
           @Content(mediaType = "application/json", schema = @Schema(implementation = GeneralResponseDTO.class))
       })
   })
   @GetMapping("/{templateId}")
-  public ResponseEntity<TemplateDTO> getTemplateById(@PathVariable("templateId") UUID templateId) {
+  public ResponseEntity<TemplateResponseDTO> getTemplateById(@PathVariable("templateId") UUID templateId) {
     return ResponseEntity.ok().body(templateService.getTemplateById(templateId));
   }
 

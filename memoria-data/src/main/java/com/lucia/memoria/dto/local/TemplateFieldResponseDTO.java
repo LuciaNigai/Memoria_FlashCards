@@ -2,8 +2,7 @@ package com.lucia.memoria.dto.local;
 
 import com.lucia.memoria.helper.FieldRole;
 import com.lucia.memoria.helper.TemplateFieldType;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,12 +13,12 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TemplateFieldDTO {
+public class TemplateFieldResponseDTO {
 
   private UUID id;
-  @NotBlank
   private String name;
-  @NotNull
   private FieldRole fieldRole;
   private TemplateFieldType templateFieldType;
+  private OffsetDateTime createdAt;
+  private OffsetDateTime updatedAt;
 }

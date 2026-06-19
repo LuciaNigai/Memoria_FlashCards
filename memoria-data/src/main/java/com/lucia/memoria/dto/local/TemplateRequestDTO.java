@@ -1,5 +1,7 @@
 package com.lucia.memoria.dto.local;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
@@ -13,14 +15,16 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CardRequestDTO {
+public class TemplateRequestDTO {
 
   private UUID id;
   @NotNull
-  private UUID deckId;
+  private UUID ownerId;
+  @NotBlank
+  private String name;
   @NotNull
-  private UUID templateId;
-  @NotNull
-  @Size(min = 2, message = "Card should have at least two fields")
-  private List<FieldRequestDTO> fields;
+  @Size(min = 2, message = "Template should have at least two fields")
+  @Valid
+  private List<TemplateFieldRequestDTO> fields;
+  private boolean includesPartOfSpeech;
 }

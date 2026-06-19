@@ -125,7 +125,7 @@ public class DeckService {
   }
 
   @Transactional
-  public DeckRequestDTO renameDeck(UUID deckId, String name) {
+  public DeckResponseDTO renameDeck(UUID deckId, String name) {
     Deck deck = findDeckOrThrow(deckId);
 
     String trimmedName = validateAndTrimName(name);
@@ -140,7 +140,7 @@ public class DeckService {
 
     // update all child paths
     updateChildPaths(deck);
-    return deckMapper.toMinimalDTO(deckRepository.save(deck));
+    return deckMapper.toDTO(deckRepository.save(deck));
   }
 
   private void updateChildPaths(Deck parentDeck) {

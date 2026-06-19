@@ -2,6 +2,7 @@ package com.lucia.memoria.dto.local;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,18 +13,21 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FieldDTO {
+public class FieldResponseDTO {
 
   @NotNull
   @Valid
-  private TemplateFieldDTO templateField;
+  private TemplateFieldResponseDTO templateField;
   private UUID id;
   private String content;
+  private OffsetDateTime createdAt;
+  private OffsetDateTime updatedAt;
 
-  public static FieldDTO blankWithTemplate(TemplateFieldDTO templateFieldDTO) {
-    FieldDTO dto = new FieldDTO();
+  public static FieldResponseDTO blankWithTemplate(
+      TemplateFieldResponseDTO templateFieldResponseDTO) {
+    FieldResponseDTO dto = new FieldResponseDTO();
     dto.setContent(null);
-    dto.setTemplateField(templateFieldDTO);
+    dto.setTemplateField(templateFieldResponseDTO);
     return dto;
   }
 }

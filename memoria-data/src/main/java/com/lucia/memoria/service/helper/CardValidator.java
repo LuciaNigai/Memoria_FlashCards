@@ -1,6 +1,6 @@
 package com.lucia.memoria.service.helper;
 
-import com.lucia.memoria.dto.local.FieldMinimalDTO;
+import com.lucia.memoria.dto.local.FieldRequestDTO;
 import com.lucia.memoria.exception.ConflictWithDataException;
 import com.lucia.memoria.exception.DuplicateException;
 import com.lucia.memoria.helper.FieldRole;
@@ -19,7 +19,7 @@ public class CardValidator {
   private final CardRepository cardRepository;
 
   public void validateDuplicates(
-      FieldMinimalDTO minimalDTO, boolean saveDuplicate, UUID currentCardId, FieldRole fieldRole) {
+      FieldRequestDTO minimalDTO, boolean saveDuplicate, UUID currentCardId, FieldRole fieldRole) {
     String sanitizedContent = minimalDTO.getContent() != null ? minimalDTO.getContent().trim() : "";
 
     List<UUID> duplicateIds = cardRepository.findCardIdsByFieldRoleAndContent(fieldRole, sanitizedContent)

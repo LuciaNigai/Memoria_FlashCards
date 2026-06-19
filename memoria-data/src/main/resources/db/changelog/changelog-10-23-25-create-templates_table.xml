@@ -30,6 +30,12 @@
       <column name="includes_part_of_speech" type="BOOLEAN">
         <constraints nullable="false"/>
       </column>
+      <column name="created_at" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
 
     <addForeignKeyConstraint

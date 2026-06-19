@@ -39,6 +39,12 @@
         <constraints nullable="false"/>
       </column>
       <column name="template_fields_order" type="INT"/>
+      <column name="created_at" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
 
     <createTable tableName="template_field_options">

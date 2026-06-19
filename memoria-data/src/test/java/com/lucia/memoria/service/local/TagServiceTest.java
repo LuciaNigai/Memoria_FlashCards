@@ -1,9 +1,20 @@
 package com.lucia.memoria.service.local;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
-import com.lucia.memoria.dto.local.TagDTO;
+import com.lucia.memoria.dto.local.TagRequestDTO;
+import com.lucia.memoria.dto.local.TagResponseDTO;
 import com.lucia.memoria.exception.ConflictWithDataException;
 import com.lucia.memoria.exception.DuplicateException;
 import com.lucia.memoria.exception.NotFoundException;
@@ -12,6 +23,7 @@ import com.lucia.memoria.model.Card;
 import com.lucia.memoria.model.Tag;
 import com.lucia.memoria.model.User;
 import com.lucia.memoria.repository.TagRepository;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -46,7 +58,8 @@ class TagServiceTest {
   private User user;
   private UUID tagId;
   private Tag tag;
-  private TagDTO tagDTO;
+  private TagResponseDTO tagResponseDTO;
+  private TagRequestDTO tagRequestDTO;
 
   @BeforeEach
   void setUp() {
@@ -61,7 +74,8 @@ class TagServiceTest {
     tag.setColor("#FFFFFF");
     tag.setUser(user);
 
-    tagDTO = new TagDTO(tagId, "Test Tag", "#FFFFFF");
+    tagRequestDTO = new TagRequestDTO(tagId, "Test Tag", "#FFFFFF");
+    tagResponseDTO = new TagResponseDTO(tagId, "Test Tag", "#FFFFFF", OffsetDateTime.now(), OffsetDateTime.now());
   }
 
   // ==========================================
@@ -75,14 +89,14 @@ class TagServiceTest {
     when(userService.getUserEntityById(userId)).thenReturn(user);
     when(tagRepository.findByName(anyString())).thenReturn(Optional.empty());
     when(tagRepository.save(any(Tag.class))).thenReturn(tag);
-    when(tagMapper.toDTO(any(Tag.class))).thenReturn(tagDTO);
+    when(tagMapper.toDTO(any(Tag.class))).thenReturn(tagResponseDTO);
 
     // Act
-    TagDTO result = tagService.createTag(userId, tagDTO);
+    TagResponseDTO result = tagService.createTag(userId, tagRequestDTO);
 
     // Assert
     assertNotNull(result);
-    assertEquals(tagDTO.name(), result.name());
+    assertEquals(tagResponseDTO.name(), result.name());
     verify(userService).getUserEntityById(userId);
     verify(tagRepository).findByName("Test Tag");
     verify(tagRepository).save(any(Tag.class));
@@ -98,7 +112,7 @@ class TagServiceTest {
 
     // Act & Assert
     DuplicateException thrown = assertThrows(DuplicateException.class,
-        () -> tagService.createTag(userId, tagDTO));
+        () -> tagService.createTag(userId, tagRequestDTO));
 
     assertEquals("The tag with that name already exists", thrown.getMessage());
     verify(userService).getUserEntityById(userId);
@@ -115,20 +129,19 @@ class TagServiceTest {
   void getAllUserTags_success() {
     // Arrange
     List<Tag> tags = Collections.singletonList(tag);
-    List<TagDTO> tagDTOs = Collections.singletonList(tagDTO);
 
     when(userService.getUserEntityById(userId)).thenReturn(user);
     when(tagRepository.findByUser(user)).thenReturn(tags);
-    when(tagMapper.toDTOList(tags)).thenReturn(tagDTOs);
+    when(tagMapper.toDTOList(tags)).thenReturn(List.of(tagResponseDTO));
 
     // Act
-    List<TagDTO> result = tagService.getAllUserTags(userId);
+    List<TagResponseDTO> result = tagService.getAllUserTags(userId);
 
     // Assert
     assertNotNull(result);
     assertFalse(result.isEmpty());
     assertEquals(1, result.size());
-    assertEquals(tagDTO.name(), result.getFirst().name());
+    assertEquals(tagResponseDTO.name(), result.getFirst().name());
     verify(userService).getUserEntityById(userId);
     verify(tagRepository).findByUser(user);
     verify(tagMapper).toDTOList(tags);
@@ -230,15 +243,15 @@ class TagServiceTest {
     updatedTag.setColor("#FFFFFF");
     updatedTag.setUser(user);
 
-    TagDTO updatedTagDTO = new TagDTO(tagId, newName, "#FFFFFF");
+    TagResponseDTO updatedTagRequestDTO = new TagResponseDTO(tagId, newName, "#FFFFFF", OffsetDateTime.now().minusDays(2), OffsetDateTime.now());
 
     when(tagRepository.findByTagId(tagId)).thenReturn(Optional.of(tag));
     when(tagRepository.findByName(newName)).thenReturn(Optional.empty());
     when(tagRepository.save(any(Tag.class))).thenReturn(updatedTag);
-    when(tagMapper.toDTO(updatedTag)).thenReturn(updatedTagDTO);
+    when(tagMapper.toDTO(updatedTag)).thenReturn(updatedTagRequestDTO);
 
     // Act
-    TagDTO result = tagService.renameTag(tagId, newName);
+    TagResponseDTO result = tagService.renameTag(tagId, newName);
 
     // Assert
     assertNotNull(result);
@@ -256,14 +269,14 @@ class TagServiceTest {
     // Arrange
     String newName = "test tag"; // Same name, different case
     when(tagRepository.findByTagId(tagId)).thenReturn(Optional.of(tag));
-    when(tagMapper.toDTO(tag)).thenReturn(tagDTO); // Should return original DTO
+    when(tagMapper.toDTO(tag)).thenReturn(tagResponseDTO); // Should return original DTO
 
     // Act
-    TagDTO result = tagService.renameTag(tagId, newName);
+    TagResponseDTO result = tagService.renameTag(tagId, newName);
 
     // Assert
     assertNotNull(result);
-    assertEquals(tagDTO.name(), result.name());
+    assertEquals(tagResponseDTO.name(), result.name());
     verify(tagRepository).findByTagId(tagId);
     verify(tagRepository, never()).findByName(anyString()); // Should not check for duplicates
     verify(tagRepository, never()).save(any(Tag.class)); // Should not save
@@ -346,14 +359,14 @@ class TagServiceTest {
   @DisplayName("Should return TagDTO when Tag exists")
   void findByTagId_success() {
     // Arrange
-    TagDTO expectedDto = new TagDTO(tagId, "testName", "testColor");
+    TagResponseDTO expectedDto = new TagResponseDTO(tagId, "testName", "testColor", OffsetDateTime.now().minusDays(3), OffsetDateTime.now());
 
     // Stub both the repository call (used internally) and the mapper
     when(tagRepository.findByTagId(tagId)).thenReturn(Optional.of(tag));
     when(tagMapper.toDTO(tag)).thenReturn(expectedDto);
 
     // Act
-    TagDTO result = tagService.findByTagId(tagId);
+    TagResponseDTO result = tagService.findByTagId(tagId);
 
     // Assert
     assertNotNull(result);

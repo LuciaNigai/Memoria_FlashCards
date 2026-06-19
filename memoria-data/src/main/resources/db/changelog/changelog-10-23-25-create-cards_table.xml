@@ -25,6 +25,12 @@
       <column name="template_id" type="BIGINT">
         <constraints nullable="false"/>
       </column>
+      <column name="created_at" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
 
     <addForeignKeyConstraint

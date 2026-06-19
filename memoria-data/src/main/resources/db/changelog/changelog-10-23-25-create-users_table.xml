@@ -24,6 +24,12 @@
       <column name="username" type="VARCHAR(200)">
         <constraints nullable="false"/>
       </column>
+      <column name="created_at" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="timestamp with time zone">
+        <constraints nullable="false"/>
+      </column>
     </createTable>
 
     <createIndex tableName="users" indexName="idx_user_id">

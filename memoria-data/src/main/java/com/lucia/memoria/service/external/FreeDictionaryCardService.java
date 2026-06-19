@@ -3,9 +3,9 @@ package com.lucia.memoria.service.external;
 import com.lucia.memoria.dto.externalapi.DefinitionDTO;
 import com.lucia.memoria.dto.externalapi.MeaningDTO;
 import com.lucia.memoria.dto.externalapi.ResponseDTO;
-import com.lucia.memoria.dto.local.CardResponseDTO;
-import com.lucia.memoria.dto.local.FieldDTO;
-import com.lucia.memoria.dto.local.TemplateFieldDTO;
+import com.lucia.memoria.dto.local.CardRequestDTO;
+import com.lucia.memoria.dto.local.FieldRequestDTO;
+import com.lucia.memoria.dto.local.TemplateFieldRequestDTO;
 import com.lucia.memoria.helper.FieldRole;
 import com.lucia.memoria.model.Template;
 import com.lucia.memoria.model.TemplateField;
@@ -26,7 +26,7 @@ public class FreeDictionaryCardService {
   private final TemplateService templateService;
 
 
-  public List<CardResponseDTO> generateCards(String word) {
+  public List<CardRequestDTO> generateCards(String word) {
     Template template = templateService.getTemplateByName("default");
     List<TemplateField> templateFields = template.getFields();
 
@@ -39,7 +39,7 @@ public class FreeDictionaryCardService {
         .block();
   }
 
-  private List<CardResponseDTO> constructCardDTOs(ResponseDTO resp, Template template,
+  private List<CardRequestDTO> constructCardDTOs(ResponseDTO resp, Template template,
       List<TemplateField> templateFields) {
     List<MeaningDTO> meanings = resp.meanings() != null ? resp.meanings() : Collections.emptyList();
 //    safeguard if the word will contain more options for the same part of speech
@@ -55,7 +55,7 @@ public class FreeDictionaryCardService {
             }
         ));
 
-    List<CardResponseDTO> cards = new ArrayList<>();
+    List<CardRequestDTO> cards = new ArrayList<>();
     for (String partOfSpeech : words.keySet()) {
       List<DefinitionDTO> definitions = words.get(partOfSpeech);
       cards.add(constructCardDTO(resp, template, templateFields, partOfSpeech, definitions));
@@ -63,31 +63,31 @@ public class FreeDictionaryCardService {
     return cards;
   }
 
-  private static CardResponseDTO constructCardDTO(ResponseDTO resp, Template template,
+  private static CardRequestDTO constructCardDTO(ResponseDTO resp, Template template,
       List<TemplateField> templateFields, String partOfSpeech, List<DefinitionDTO> definitionDTOS) {
-    List<FieldDTO> cardFields = templateFields.stream().map(fieldTemplate ->
+    List<FieldRequestDTO> cardFields = templateFields.stream().map(fieldTemplate ->
     {
       FieldRole templateFieldRole = fieldTemplate.getFieldRole();
-      TemplateFieldDTO templateFieldDTO = new TemplateFieldDTO(fieldTemplate.getTemplateFieldId(),
-          fieldTemplate.getName(),
-          fieldTemplate.getFieldRole(), fieldTemplate.getTemplateFieldType());
+      TemplateFieldRequestDTO templateFieldRequestDTO = new TemplateFieldRequestDTO(
+          fieldTemplate.getTemplateFieldId(), fieldTemplate.getName(), fieldTemplate.getFieldRole(),
+          fieldTemplate.getTemplateFieldType());
       if (templateFieldRole == FieldRole.FRONT) {
         String frontContent = resp.word();
         if (resp.phonetic() != null && !resp.phonetic().isEmpty()) {
           frontContent += "\nPronunciation: " + resp.phonetic();
         }
-        return new FieldDTO(templateFieldDTO, null, frontContent);
+        return new FieldRequestDTO(frontContent, templateFieldRequestDTO.getId());
       } else if (templateFieldRole == FieldRole.BACK) {
         String definitions = definitionDTOS.isEmpty() ? "No definitions available."
             : formatDefinitions(definitionDTOS);
-        return new FieldDTO(templateFieldDTO, null, definitions);
+        return new FieldRequestDTO(definitions, templateFieldRequestDTO.getId());
       } else if (templateFieldRole == FieldRole.AUXILIARY) {
-        return new FieldDTO(templateFieldDTO, null, partOfSpeech);
+        return new FieldRequestDTO(partOfSpeech, templateFieldRequestDTO.getId());
       }
       throw new IllegalArgumentException("Error formating response");
     }).toList();
 
-    return new CardResponseDTO(null, null, template.getTemplateId(), cardFields);
+    return new CardRequestDTO(null, null, template.getTemplateId(), cardFields);
   }
 
   private static String formatDefinitions(List<DefinitionDTO> definitions) {

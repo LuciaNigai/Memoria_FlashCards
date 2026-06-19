@@ -1,7 +1,8 @@
 package com.lucia.memoria.service.local;
 
-import com.lucia.memoria.dto.local.TemplateDTO;
-import com.lucia.memoria.dto.local.TemplateFieldDTO;
+import com.lucia.memoria.dto.local.TemplateFieldRequestDTO;
+import com.lucia.memoria.dto.local.TemplateRequestDTO;
+import com.lucia.memoria.dto.local.TemplateResponseDTO;
 import com.lucia.memoria.exception.ConflictWithDataException;
 import com.lucia.memoria.exception.NotFoundException;
 import com.lucia.memoria.helper.FieldRole;
@@ -41,37 +42,37 @@ public class TemplateService {
   private final CardMapper cardMapper;
 
   @Transactional(propagation = Propagation.REQUIRED)
-  public TemplateDTO createTemplate(TemplateDTO templateDTO) {
-    User owner = userService.getUserEntityById(templateDTO.getOwnerId());
+  public TemplateResponseDTO createTemplate(TemplateRequestDTO templateRequestDTO) {
+    User owner = userService.getUserEntityById(templateRequestDTO.getOwnerId());
 
-    Optional<Template> templateExists = templateRepository.findByNameAndOwner(templateDTO.getName(),
+    Optional<Template> templateExists = templateRepository.findByNameAndOwner(templateRequestDTO.getName(),
         owner);
 
     if (templateExists.isPresent()) {
       throw new IllegalArgumentException(
-          "Template with name " + templateDTO.getName() + " already exists");
+          "Template with name " + templateRequestDTO.getName() + " already exists");
     }
 
     Template template = new Template();
     template.setTemplateId(UUID.randomUUID());
-    template.setName(templateDTO.getName());
+    template.setName(templateRequestDTO.getName());
     template.setOwner(owner);
 
-    for (TemplateFieldDTO templateFieldDTO : templateDTO.getFields()) {
-      addTemplateField(templateFieldDTO, template);
+    for (TemplateFieldRequestDTO templateFieldResponseDTO : templateRequestDTO.getFields()) {
+      addTemplateField(templateFieldResponseDTO, template);
     }
 
     boolean hasPOS = template.getFields().stream()
         .anyMatch(f -> PART_OF_SPEECH.equalsIgnoreCase(f.getName()));
-    if (templateDTO.isIncludesPartOfSpeech() && !hasPOS) {
-      addPartOfSpeechFieldIfNeeded(templateDTO, template);
+    if (templateRequestDTO.isIncludesPartOfSpeech() && !hasPOS) {
+      addPartOfSpeechFieldIfNeeded(templateRequestDTO, template);
     }
 
     return templateMapper.toDTO(templateRepository.save(template));
   }
 
   @Transactional(readOnly = true)
-  public TemplateDTO getTemplateById(UUID templateId) {
+  public TemplateResponseDTO getTemplateById(UUID templateId) {
     return templateMapper.toDTO(getTemplateEntityById(templateId));
   }
 
@@ -87,7 +88,7 @@ public class TemplateService {
   }
 
   @Transactional(readOnly = true)
-  public List<TemplateDTO> getTemplatesByUserId(UUID userId) {
+  public List<TemplateResponseDTO> getTemplatesByUserId(UUID userId) {
     User owner = userService.getUserEntityById(userId);
 
     return templateMapper.toDTOList(templateRepository.findAllByOwner(owner));
@@ -109,18 +110,18 @@ public class TemplateService {
   }
 
 
-  private void addTemplateField(TemplateFieldDTO templateFieldDTO, Template template) {
+  private void addTemplateField(TemplateFieldRequestDTO templateFieldRequestDTO, Template template) {
     TemplateFieldType templateFieldType =
-        templateFieldDTO.getTemplateFieldType() == null ? new TemplateFieldType(FieldType.TEXT)
-            : templateFieldDTO.getTemplateFieldType();
-    TemplateField templateField = templateFieldMapper.toEntity(templateFieldDTO);
+        templateFieldRequestDTO.getTemplateFieldType() == null ? new TemplateFieldType(FieldType.TEXT)
+            : templateFieldRequestDTO.getTemplateFieldType();
+    TemplateField templateField = templateFieldMapper.toEntity(templateFieldRequestDTO);
     templateField.setTemplateFieldId(UUID.randomUUID());
     templateField.setTemplateFieldType(templateFieldType);
     template.addField(templateField);
   }
 
-  private static void addPartOfSpeechFieldIfNeeded(TemplateDTO templateDTO, Template template) {
-    if (templateDTO.isIncludesPartOfSpeech()) {
+  private static void addPartOfSpeechFieldIfNeeded(TemplateRequestDTO templateRequestDTO, Template template) {
+    if (templateRequestDTO.isIncludesPartOfSpeech()) {
       TemplateField templateField = new TemplateField();
       templateField.setTemplateFieldId(UUID.randomUUID());
       templateField.setName(PART_OF_SPEECH);

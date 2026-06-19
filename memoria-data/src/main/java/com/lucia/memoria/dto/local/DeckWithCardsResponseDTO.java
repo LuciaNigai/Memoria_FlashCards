@@ -1,7 +1,7 @@
 package com.lucia.memoria.dto.local;
 
-import jakarta.validation.constraints.NotNull;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,9 +11,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FieldMinimalDTO {
+public class DeckWithCardsResponseDTO {
 
-  private String content;
-  @NotNull
-  private UUID templateFieldId;
+  private DeckResponseDTO deck;
+  private List<CardResponseDTO> cards = new ArrayList<>();
 }

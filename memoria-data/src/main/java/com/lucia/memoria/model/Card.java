@@ -1,14 +1,11 @@
 package com.lucia.memoria.model;
 
-import com.lucia.memoria.dto.local.FieldMinimalDTO;
+import com.lucia.memoria.dto.local.FieldRequestDTO;
 import com.lucia.memoria.exception.ConflictWithDataException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -35,11 +32,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "cards")
-public class Card {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+public class Card extends BaseEntity{
 
   @Column(name = "card_id", nullable = false, unique = true, updatable = false)
   private UUID cardId = UUID.randomUUID();
@@ -85,13 +78,13 @@ public class Card {
     tag.getCards().remove(this);
   }
 
-  public void syncFields(List<FieldMinimalDTO> dtos, Map<UUID, TemplateField> templateFields) {
+  public void syncFields(List<FieldRequestDTO> dtos, Map<UUID, TemplateField> templateFields) {
     // 1. Create a lookup map of current fields for easy access
     Map<UUID, Field> existingFields = this.fields.stream()
         .filter(f -> f.getTemplateField() != null)
         .collect(Collectors.toMap(f -> f.getTemplateField().getTemplateFieldId(), f-> f));
 
-    for (FieldMinimalDTO dto : dtos) {
+    for (FieldRequestDTO dto : dtos) {
       UUID templateId = dto.getTemplateFieldId();
       Field field = existingFields.get(templateId);
 

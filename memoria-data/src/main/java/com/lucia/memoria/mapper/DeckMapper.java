@@ -6,7 +6,7 @@ import com.lucia.memoria.model.Deck;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper
 public interface DeckMapper {
 
   @Mapping(target = "userId", source = "user.userId")

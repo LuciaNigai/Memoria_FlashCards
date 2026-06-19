@@ -3,5 +3,5 @@ package com.lucia.memoria.dto.local;
 import jakarta.validation.constraints.NotBlank;
 import java.util.UUID;
 
-public record TagDTO(UUID id, @NotBlank String name, @NotBlank String color) {
+public record TagRequestDTO(UUID id, @NotBlank String name, @NotBlank String color) {
 }

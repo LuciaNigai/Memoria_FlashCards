@@ -2,9 +2,9 @@ package com.lucia.memoria.controller;
 
 import com.lucia.memoria.dto.local.DeckRequestDTO;
 import com.lucia.memoria.dto.local.DeckResponseDTO;
+import com.lucia.memoria.dto.local.DeckWithCardsResponseDTO;
 import com.lucia.memoria.dto.local.GeneralResponseDTO;
 import com.lucia.memoria.dto.local.RenameRequestDTO;
-import com.lucia.memoria.dto.local.ResponseDeckWithCardsDTO;
 import com.lucia.memoria.service.local.CardService;
 import com.lucia.memoria.service.local.DeckService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,14 +57,14 @@ public class DeckController {
   @Operation(summary = "Get deck with cards", description = "Returns a deck and all its associated cards.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Found deck with cards", content = {
-          @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDeckWithCardsDTO.class))
+          @Content(mediaType = "application/json", schema = @Schema(implementation = DeckWithCardsResponseDTO.class))
       }),
       @ApiResponse(responseCode = "404", description = "Deck not found", content = {
           @Content(mediaType = "application/json", schema = @Schema(implementation = GeneralResponseDTO.class))
       })
   })
   @GetMapping("/{deckId}/cards")
-  public ResponseEntity<ResponseDeckWithCardsDTO> getDeckWithCards(@PathVariable("deckId") UUID deckId) {
+  public ResponseEntity<DeckWithCardsResponseDTO> getDeckWithCards(@PathVariable("deckId") UUID deckId) {
     return ResponseEntity.ok().body(cardService.getDeckWithCards(deckId));
   }
 
@@ -112,7 +112,7 @@ public class DeckController {
       })
   })
   @PatchMapping("/{deckId}")
-  public  ResponseEntity<DeckRequestDTO> renameDeck(@PathVariable("deckId") UUID deckId, @RequestBody
+  public  ResponseEntity<DeckResponseDTO> renameDeck(@PathVariable("deckId") UUID deckId, @RequestBody
       RenameRequestDTO newName) {
     return ResponseEntity.ok().body(deckService.renameDeck(deckId, newName.name()));
   }

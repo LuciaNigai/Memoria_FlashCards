@@ -181,7 +181,7 @@ class DeckServiceTest {
     // Arrange
     when(deckRepository.findByDeckId(deckId)).thenReturn(Optional.of(deck));
     when(deckRepository.save(any(Deck.class))).thenReturn(deck);
-    when(deckMapper.toMinimalDTO(deck)).thenReturn(deckRequestDTO);
+    when(deckMapper.toDTO(deck)).thenReturn(deckResponseDTO);
 
     // Act
     deckService.renameDeck(deckId, "New Name");

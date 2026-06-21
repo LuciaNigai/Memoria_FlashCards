@@ -11,7 +11,6 @@ import com.lucia.memoria.helper.TemplateFieldType;
 import com.lucia.memoria.mapper.CardMapper;
 import com.lucia.memoria.mapper.TemplateFieldMapper;
 import com.lucia.memoria.mapper.TemplateMapper;
-import com.lucia.memoria.model.Card;
 import com.lucia.memoria.model.Template;
 import com.lucia.memoria.model.TemplateField;
 import com.lucia.memoria.model.User;
@@ -96,17 +95,21 @@ public class TemplateService {
 
   @Transactional(propagation = Propagation.REQUIRED)
   public void deleteTemplate(UUID templateId) {
+    boolean isTemplateUsed = isTemplateInUse(templateId);
+    if (isTemplateUsed) {
+      throw new ConflictWithDataException(
+          "Template cannot be deleted. There are still cards that use that template.");
+    }
+
     Template template = templateRepository.findTemplateByTemplateIdWithFields(templateId)
         .orElseThrow(
             () -> new NotFoundException("Template you are trying to delete does not exist"));
 
-    List<Card> templateCards = cardRepository.findByTemplate(template);
-    if (!templateCards.isEmpty()) {
-      throw new ConflictWithDataException(
-          "Template cannot be deleted. There are still cards that use that template.",
-          cardMapper.toRequestDTOList(templateCards));
-    }
     templateRepository.delete(template);
+  }
+
+  private boolean isTemplateInUse(UUID templateId) {
+    return cardRepository.countByTemplateTemplateId(templateId) > 0;
   }
 
 

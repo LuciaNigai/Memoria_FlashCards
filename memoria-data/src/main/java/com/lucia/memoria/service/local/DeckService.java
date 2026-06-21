@@ -8,11 +8,11 @@ import com.lucia.memoria.helper.AccessLevel;
 import com.lucia.memoria.mapper.DeckMapper;
 import com.lucia.memoria.model.Deck;
 import com.lucia.memoria.model.User;
+import com.lucia.memoria.repository.CardRepository;
 import com.lucia.memoria.repository.DeckRepository;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 /**
- * Service for managing hierarchical Flashcard Decks.
- * Supports a tree-like structure using path-based indexing (e.g., Parent::Child).
- * Handles recursive operations like subtree deletion and path updates.
+ * Service for managing hierarchical Flashcard Decks. Supports a tree-like structure using
+ * path-based indexing (e.g., Parent::Child). Handles recursive operations like subtree deletion and
+ * path updates.
  */
 
 @Service
@@ -38,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeckService {
 
   private final DeckRepository deckRepository;
+  private final CardRepository cardRepository;
   private final UserService userService;
   private final DeckMapper deckMapper;
 
@@ -85,7 +86,7 @@ public class DeckService {
         .collect(Collectors.toMap(
             Deck::getPath,
             deckMapper::toDTO,
-            (existing, replacement) ->existing,
+            (existing, replacement) -> existing,
             LinkedHashMap::new
         ));
 
@@ -109,90 +110,41 @@ public class DeckService {
 
   @Transactional
   public void deleteDeck(UUID deckId, boolean force) {
-    Deck rootDeck = deckRepository.findByDeckIdWithCards(deckId).orElseThrow(
-        () -> new NotFoundException("Deck you are trying to delete does not exist")
-    );
-    // get all user decks
-    List<Deck> allUserDecks = deckRepository.findAllByUser(rootDeck.getUser());
-    List<Deck> subtree = getSubtree(allUserDecks, rootDeck);
+    Deck rootDeck = findDeckOrThrow(deckId);
 
-    //  check for cards if force is false
     if (!force) {
-      validateEmptySubtree(subtree);
+      long cardCount = cardRepository.countCardsInSubtree(rootDeck.getPath());
+      if (cardCount > 0) {
+        throw new ConflictWithDataException(
+            "Cannot delete deck(s) containing cards without force flag."
+        );
+      }
     }
-    //  delete decks
+
+    List<Deck> subtree = deckRepository.findSubtreeByPath(rootDeck.getPath());
     deckRepository.deleteAll(subtree);
   }
 
   @Transactional
   public DeckResponseDTO renameDeck(UUID deckId, String name) {
     Deck deck = findDeckOrThrow(deckId);
-
     String trimmedName = validateAndTrimName(name);
 
-    // Compute new path and validate
+    // Keep track of the old path before modifying it
+    String oldPath = deck.getPath();
+
+    // Compute and validate the parent's new path
     String newPath = Deck.computePath(deck.getParentDeck(), trimmedName);
     validateUniquePath(newPath, deck.getUser(), deck.getDeckId());
 
-    // Update name and path
-    deck.setName(name);
+    // Update the deck parent itself
+    deck.setName(trimmedName);
     deck.setPath(newPath);
+    deckRepository.save(deck);
 
-    // update all child paths
-    updateChildPaths(deck);
-    return deckMapper.toDTO(deckRepository.save(deck));
-  }
-
-  private void updateChildPaths(Deck parentDeck) {
-    // Use an iterative Stack (DFS) to update children.
-    // This avoids StackOverflowErrors that can occur with deep nesting in recursive calls.
-    Deque<Deck> stack = new ArrayDeque<>();
-    stack.push(parentDeck);
-
-    List<Deck> updatedChildren = new ArrayList<>();
-
-    while (!stack.isEmpty()) {
-      Deck current = stack.pop();
-
-      List<Deck> children = deckRepository.findAllByParentDeck(current);
-      for (Deck child : children) {
-        // Update path based on parent
-        child.setPath(current.getPath() + "::" + child.getName());
-        updatedChildren.add(child);
-        stack.push(child);
-      }
-    }
-
-    // Batch save all updated children
-    if (!updatedChildren.isEmpty()) {
-      deckRepository.saveAll(updatedChildren);
-    }
-  }
-
-  private static List<Deck> getSubtree(List<Deck> allUserDecks, Deck rootDeck) {
-    // Build a parent -> children lookup map for O(1) access during traversal
-    Map<UUID, List<Deck>> parentMap = new HashMap<>();
-    for (Deck deck : allUserDecks) {
-      if (deck.getParentDeck() != null) {
-        parentMap.computeIfAbsent(deck.getParentDeck().getDeckId(), k -> new ArrayList<>())
-            .add(deck);
-      }
-    }
-
-    // Iteratively collect the entire subtree using a stack-based Depth-First Search.
-    // This approach ensures memory safety for large or deeply nested deck structures.
-    List<Deck> decksToDelete = new ArrayList<>();
-    Deque<Deck> stack = new ArrayDeque<>();
-    stack.push(rootDeck);
-
-    while (!stack.isEmpty()) {
-      Deck current = stack.pop();
-      decksToDelete.add(current);
-
-      List<Deck> children = parentMap.getOrDefault(current.getDeckId(), List.of());
-      stack.addAll(children);
-    }
-    return decksToDelete;
+    // Bulk update all children instantly in the database
+    deckRepository.updateSubtreePaths(oldPath, newPath);
+    return deckMapper.toDTO(deck);
   }
 
   private String validateAndTrimName(String name) {
@@ -209,7 +161,9 @@ public class DeckService {
   private void validateUniquePath(String path, User user, UUID currentId) {
     deckRepository.findByPathAndUser(path, user)
         .filter(d -> !d.getDeckId().equals(currentId))
-        .ifPresent(d -> { throw new ConflictWithDataException("Path already exists: " + path); });
+        .ifPresent(d -> {
+          throw new ConflictWithDataException("Path already exists: " + path);
+        });
   }
 
   private String getParentPath(String path) {
@@ -221,28 +175,10 @@ public class DeckService {
     return (lastIndex == -1) ? null : path.substring(0, lastIndex);
   }
 
-  /**
-   * Validates that none of the decks in the provided list contain cards.
-   * @throws ConflictWithDataException if any deck in the subtree has cards.
-   */
-  private void validateEmptySubtree(List<Deck> subtree) {
-    List<UUID> decksWithCards = subtree.stream()
-        .filter(deck -> !deck.getCards().isEmpty())
-        .map(Deck::getDeckId)
-        .toList();
-
-    if (!decksWithCards.isEmpty()) {
-      throw new ConflictWithDataException(
-          "Cannot delete deck(s) containing cards without force flag.",
-          decksWithCards
-      );
-    }
-  }
-
   // --- Private Helper ---
   // This is the "Source of Truth" for finding a deck.
   // Internal methods call this to avoid the "this" proxy warning.
-  private Deck findDeckOrThrow(UUID deckId) {
+  Deck findDeckOrThrow(UUID deckId) {
     return deckRepository.findByDeckId(deckId)
         .orElseThrow(() -> new NotFoundException("Deck not found."));
   }

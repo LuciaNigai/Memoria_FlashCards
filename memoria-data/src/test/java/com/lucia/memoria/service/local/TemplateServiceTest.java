@@ -18,14 +18,12 @@ import com.lucia.memoria.helper.FieldRole;
 import com.lucia.memoria.mapper.CardMapper;
 import com.lucia.memoria.mapper.TemplateFieldMapper;
 import com.lucia.memoria.mapper.TemplateMapper;
-import com.lucia.memoria.model.Card;
 import com.lucia.memoria.model.Template;
 import com.lucia.memoria.model.TemplateField;
 import com.lucia.memoria.model.User;
 import com.lucia.memoria.repository.CardRepository;
 import com.lucia.memoria.repository.TemplateRepository;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -188,7 +186,7 @@ class TemplateServiceTest {
     // Arrange
     when(templateRepository.findTemplateByTemplateIdWithFields(templateId))
         .thenReturn(Optional.of(template));
-    when(cardRepository.findByTemplate(template)).thenReturn(Collections.emptyList());
+    when(cardRepository.countByTemplateTemplateId(templateId)).thenReturn(0L);
 
     // Act
     templateService.deleteTemplate(templateId);
@@ -203,7 +201,7 @@ class TemplateServiceTest {
     // Arrange
     when(templateRepository.findTemplateByTemplateIdWithFields(templateId))
         .thenReturn(Optional.of(template));
-    when(cardRepository.findByTemplate(template)).thenReturn(List.of(new Card()));
+    when(cardRepository.countByTemplateTemplateId(templateId)).thenReturn(1L);
 
     // Act & Assert
     assertThrows(ConflictWithDataException.class, () -> templateService.deleteTemplate(templateId));

@@ -3,7 +3,6 @@ package com.lucia.memoria.repository;
 import com.lucia.memoria.helper.FieldRole;
 import com.lucia.memoria.model.Card;
 import com.lucia.memoria.model.Deck;
-import com.lucia.memoria.model.Template;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,5 +35,11 @@ public interface CardRepository extends JpaRepository<Card, Long> {
 
   Optional<Card> findByCardId(UUID cardId);
 
-  List<Card> findByTemplate(Template template);
+  long countByTemplateTemplateId(UUID templateId);
+  @Query("""
+    SELECT COUNT(c.id) FROM Card c
+    JOIN c.deck d
+    WHERE d.path = :rootPath OR d.path LIKE CONCAT(:rootPath, '::%') ESCAPE '\\'
+    """)
+  long countCardsInSubtree(@Param("rootPath") String rootPath);
 }

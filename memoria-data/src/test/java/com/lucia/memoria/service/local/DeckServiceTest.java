@@ -19,6 +19,7 @@ import com.lucia.memoria.helper.AccessLevel;
 import com.lucia.memoria.mapper.DeckMapper;
 import com.lucia.memoria.model.Deck;
 import com.lucia.memoria.model.User;
+import com.lucia.memoria.repository.CardRepository;
 import com.lucia.memoria.repository.DeckRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,8 @@ class DeckServiceTest {
 
   @Mock
   private DeckRepository deckRepository;
+  @Mock
+  private CardRepository cardRepository;
   @Mock
   private UserService userService;
   @Mock
@@ -153,8 +156,10 @@ class DeckServiceTest {
   @DisplayName("Should successfully delete a deck and its subtree when force flag is true")
   void deleteDeck_success_forceTrue() {
     // Arrange
-    when(deckRepository.findByDeckIdWithCards(deckId)).thenReturn(Optional.of(deck));
-    when(deckRepository.findAllByUser(user)).thenReturn(List.of(deck));
+    Deck childDeck = new Deck();
+    deck.setPath(deck.getPath()+"::childDeck");
+    when(deckRepository.findByDeckId(deckId)).thenReturn(Optional.ofNullable(deck));
+    when(deckRepository.findSubtreeByPath(anyString())).thenReturn(List.of(childDeck));
 
     // Act
     deckService.deleteDeck(deckId, true);
@@ -167,9 +172,8 @@ class DeckServiceTest {
   @DisplayName("Should throw ConflictWithDataException when deleting a deck with cards without force flag")
   void deleteDeck_withCards_noForce_throwsException() {
     // Arrange
-    deck.setCards(List.of(mock(com.lucia.memoria.model.Card.class)));
-    when(deckRepository.findByDeckIdWithCards(deckId)).thenReturn(Optional.of(deck));
-    when(deckRepository.findAllByUser(user)).thenReturn(List.of(deck));
+    when(deckRepository.findByDeckId(deckId)).thenReturn(Optional.ofNullable(deck));
+    when(cardRepository.countCardsInSubtree(anyString())).thenReturn(2L);
 
     // Act & Assert
     assertThrows(ConflictWithDataException.class, () -> deckService.deleteDeck(deckId, false));

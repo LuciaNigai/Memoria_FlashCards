@@ -1,4 +1,4 @@
-package com.lucia.memoria.service.local;
+package com.lucia.memoria.unit.service.local;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,6 +23,8 @@ import com.lucia.memoria.model.Card;
 import com.lucia.memoria.model.Tag;
 import com.lucia.memoria.model.User;
 import com.lucia.memoria.repository.TagRepository;
+import com.lucia.memoria.service.local.TagService;
+import com.lucia.memoria.service.local.UserService;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.HashSet;

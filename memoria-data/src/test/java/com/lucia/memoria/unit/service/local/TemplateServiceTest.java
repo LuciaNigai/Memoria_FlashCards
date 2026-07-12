@@ -1,4 +1,4 @@
-package com.lucia.memoria.service.local;
+package com.lucia.memoria.unit.service.local;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -23,6 +23,8 @@ import com.lucia.memoria.model.TemplateField;
 import com.lucia.memoria.model.User;
 import com.lucia.memoria.repository.CardRepository;
 import com.lucia.memoria.repository.TemplateRepository;
+import com.lucia.memoria.service.local.TemplateService;
+import com.lucia.memoria.service.local.UserService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -199,8 +201,6 @@ class TemplateServiceTest {
   @DisplayName("Should throw ConflictWithDataException when deleting a template that is in use by cards")
   void deleteTemplate_inUseByCards_throwsConflictWithDataException() {
     // Arrange
-    when(templateRepository.findTemplateByTemplateIdWithFields(templateId))
-        .thenReturn(Optional.of(template));
     when(cardRepository.countByTemplateTemplateId(templateId)).thenReturn(1L);
 
     // Act & Assert

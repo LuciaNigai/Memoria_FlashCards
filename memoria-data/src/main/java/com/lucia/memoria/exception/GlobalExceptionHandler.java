@@ -2,8 +2,12 @@ package com.lucia.memoria.exception;
 
 import com.lucia.memoria.dto.local.DuplicateErrorResponseDTO;
 import com.lucia.memoria.dto.local.GeneralResponseDTO;
+import java.util.List;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -66,5 +70,17 @@ public class GlobalExceptionHandler {
         HttpStatus.BAD_REQUEST
     );
     return ResponseEntity.badRequest().body(response);
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<Map<String, List<String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    List<String> errors = ex.getBindingResult()
+        .getFieldErrors()
+        .stream()
+        .map(FieldError::getDefaultMessage)
+        .toList();
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(Map.of("errors", errors));
   }
 }

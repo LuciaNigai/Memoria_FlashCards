@@ -16,11 +16,11 @@ import lombok.Setter;
 public class CardRequestDTO {
 
   private UUID id;
-  @NotNull
+  @NotNull(message = "deckId should be present")
   private UUID deckId;
-  @NotNull
+  @NotNull(message = "templateId should be present")
   private UUID templateId;
-  @NotNull
+  @NotNull(message = "fields list cannot be null")
   @Size(min = 2, message = "Card should have at least two fields")
   private List<FieldRequestDTO> fields;
 }

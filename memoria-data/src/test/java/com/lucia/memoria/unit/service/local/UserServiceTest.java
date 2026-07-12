@@ -1,4 +1,4 @@
-package com.lucia.memoria.service.local;
+package com.lucia.memoria.unit.service.local;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -9,6 +9,7 @@ import com.lucia.memoria.mapper.UserMapper;
 import com.lucia.memoria.model.User;
 import com.lucia.memoria.repository.DeckRepository;
 import com.lucia.memoria.repository.UserRepository;
+import com.lucia.memoria.service.local.UserService;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

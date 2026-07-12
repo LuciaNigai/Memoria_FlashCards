@@ -9,5 +9,4 @@ class MemoriaApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }

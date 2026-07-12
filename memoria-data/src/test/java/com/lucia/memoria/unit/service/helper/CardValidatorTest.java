@@ -1,4 +1,4 @@
-package com.lucia.memoria.service.helper;
+package com.lucia.memoria.unit.service.helper;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
@@ -11,6 +11,7 @@ import com.lucia.memoria.model.Card;
 import com.lucia.memoria.model.Field;
 import com.lucia.memoria.model.TemplateField;
 import com.lucia.memoria.repository.CardRepository;
+import com.lucia.memoria.service.helper.CardValidator;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;

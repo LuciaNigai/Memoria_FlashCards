@@ -1,4 +1,4 @@
-package com.lucia.memoria.service.local;
+package com.lucia.memoria.unit.service.local;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -33,6 +33,10 @@ import com.lucia.memoria.model.Template;
 import com.lucia.memoria.model.TemplateField;
 import com.lucia.memoria.repository.CardRepository;
 import com.lucia.memoria.service.helper.CardValidator;
+import com.lucia.memoria.service.local.CardService;
+import com.lucia.memoria.service.local.DeckService;
+import com.lucia.memoria.service.local.TagService;
+import com.lucia.memoria.service.local.TemplateService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

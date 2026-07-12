@@ -14,7 +14,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,15 +32,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/data/decks")
 @Tag(name = "Decks", description = "Endpoints for managing decks")
+@AllArgsConstructor
 public class DeckController {
 
   private final DeckService deckService;
   private final CardService cardService;
 
-  public DeckController(DeckService deckService, CardService cardService) {
-    this.deckService = deckService;
-    this.cardService = cardService;
-  }
 
   @Operation(summary = "Create new deck", description = "Creates a new deck for the user.")
   @ApiResponses(value = {
@@ -50,7 +49,7 @@ public class DeckController {
       })
   })
   @PostMapping
-  public ResponseEntity<DeckResponseDTO> createDeck(@RequestBody DeckRequestDTO deckRequestDTO) {
+  public ResponseEntity<DeckResponseDTO> createDeck(@Valid @RequestBody DeckRequestDTO deckRequestDTO) {
     return ResponseEntity.status(HttpStatus.CREATED).body(deckService.createDeck(deckRequestDTO));
   }
 
@@ -112,7 +111,7 @@ public class DeckController {
       })
   })
   @PatchMapping("/{deckId}")
-  public  ResponseEntity<DeckResponseDTO> renameDeck(@PathVariable("deckId") UUID deckId, @RequestBody
+  public  ResponseEntity<DeckResponseDTO> renameDeck(@PathVariable("deckId") UUID deckId, @Valid @RequestBody
       RenameRequestDTO newName) {
     return ResponseEntity.ok().body(deckService.renameDeck(deckId, newName.name()));
   }

@@ -16,10 +16,10 @@ import lombok.Setter;
 public class DeckRequestDTO {
 
   private UUID id;
-  @NotBlank
+  @NotBlank(message = "name cannot be empty")
   private String name;
   private AccessLevel accessLevel;
   private String path;
-  @NotNull
+  @NotNull(message = "userId should be present")
   private UUID userId;
 }

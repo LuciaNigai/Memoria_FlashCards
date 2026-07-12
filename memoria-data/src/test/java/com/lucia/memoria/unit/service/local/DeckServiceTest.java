@@ -1,4 +1,4 @@
-package com.lucia.memoria.service.local;
+package com.lucia.memoria.unit.service.local;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,6 +21,8 @@ import com.lucia.memoria.model.Deck;
 import com.lucia.memoria.model.User;
 import com.lucia.memoria.repository.CardRepository;
 import com.lucia.memoria.repository.DeckRepository;
+import com.lucia.memoria.service.local.DeckService;
+import com.lucia.memoria.service.local.UserService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,7 +50,7 @@ public class CardController {
       })
   })
   @PostMapping
-  public ResponseEntity<CardResponseDTO> createCard(@RequestBody CardRequestDTO cardDTO,
+  public ResponseEntity<CardResponseDTO> createCard(@Valid @RequestBody CardRequestDTO cardDTO,
       @Parameter(description = "Allow saving duplicate cards")
       @RequestParam(name = "saveDuplicate", defaultValue = "false") boolean saveDuplicate) {
     return ResponseEntity.status(HttpStatus.CREATED)
@@ -71,7 +72,7 @@ public class CardController {
   })
   @PatchMapping("/{cardId}")
   public ResponseEntity<CardResponseDTO> updateCard(@PathVariable("cardId") UUID cardId,
-      @RequestBody CardRequestDTO cardDTO,
+      @Valid @RequestBody CardRequestDTO cardDTO,
       @Parameter(description = "Allow saving duplicate cards")
       @RequestParam(name = "saveDuplicate", defaultValue = "false") boolean saveDuplicate) {
     return ResponseEntity.ok()
@@ -122,7 +123,6 @@ public class CardController {
           @Content(mediaType = "application/json", schema = @Schema(implementation = GeneralResponseDTO.class))
       })
   })
-
   @PatchMapping("/{cardId}/{tagId}")
   public ResponseEntity<GeneralResponseDTO<Void>> attachTag(@PathVariable("cardId") UUID cardId,
       @PathVariable("tagId") UUID tagId) {

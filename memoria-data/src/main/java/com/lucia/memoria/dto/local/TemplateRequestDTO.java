@@ -1,6 +1,5 @@
 package com.lucia.memoria.dto.local;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -16,15 +15,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TemplateRequestDTO {
-
-  private UUID id;
-  @NotNull
+  @NotNull(message = "ownerId should be present")
   private UUID ownerId;
-  @NotBlank
+  @NotBlank(message = "name cannot be empty")
   private String name;
-  @NotNull
+  @NotNull(message = "template fields list cannot be null")
   @Size(min = 2, message = "Template should have at least two fields")
-  @Valid
   private List<TemplateFieldRequestDTO> fields;
   private boolean includesPartOfSpeech;
 }

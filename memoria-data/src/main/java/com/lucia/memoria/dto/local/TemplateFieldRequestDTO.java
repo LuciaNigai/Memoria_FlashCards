@@ -17,9 +17,9 @@ import lombok.Setter;
 public class TemplateFieldRequestDTO {
 
   private UUID id;
-  @NotBlank
+  @NotBlank(message = "name cannot be empty")
   private String name;
-  @NotNull
+  @NotNull(message = "fieldRole should be present")
   private FieldRole fieldRole;
   private TemplateFieldType templateFieldType;
 }

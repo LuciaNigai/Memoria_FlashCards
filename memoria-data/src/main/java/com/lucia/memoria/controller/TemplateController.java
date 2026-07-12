@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +43,7 @@ public class TemplateController {
       })
   })
   @PostMapping
-  public ResponseEntity<TemplateResponseDTO> createTemplate(@RequestBody TemplateRequestDTO templateRequestDTO) {
+  public ResponseEntity<TemplateResponseDTO> createTemplate(@Valid @RequestBody TemplateRequestDTO templateRequestDTO) {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(templateService.createTemplate(templateRequestDTO));
   }

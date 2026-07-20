@@ -1,9 +1,7 @@
 package com.lucia.memoria.model;
 
 import com.lucia.memoria.helper.FieldRole;
-import com.lucia.memoria.helper.TemplateFieldType;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -33,9 +31,6 @@ public class TemplateField extends BaseEntity{
     @Enumerated(EnumType.STRING)
     @Column(name = "field_role", nullable = false)
     private FieldRole fieldRole;
-
-    @Embedded
-    private TemplateFieldType templateFieldType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "template_id", referencedColumnName = "id")

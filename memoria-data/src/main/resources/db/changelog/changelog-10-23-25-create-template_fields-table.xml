@@ -32,9 +32,6 @@
       <column name="field_role" type="VARCHAR(20)">
         <constraints nullable="false"/>
       </column>
-      <column name="field_type" type="VARCHAR(50)">
-        <constraints nullable="false"/>
-      </column>
       <column name="template_id" type="BIGINT">
         <constraints nullable="false"/>
       </column>
@@ -46,28 +43,6 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
-
-    <createTable tableName="template_field_options">
-      <column name="template_field_id" type="BIGINT">
-        <constraints nullable="false"/>
-      </column>
-      <column name="option_value" type="VARCHAR(200)">
-        <constraints nullable="false"/>
-      </column>
-    </createTable>
-
-    <addUniqueConstraint
-      tableName="template_field_options"
-      columnNames="template_field_id, option_value"
-      constraintName="uq_template_field_options"/>
-
-    <addForeignKeyConstraint
-      baseTableName="template_field_options"
-      baseColumnNames="template_field_id"
-      constraintName="fk_template_field_options_template_fields"
-      referencedTableName="template_fields"
-      referencedColumnNames="id"
-      onDelete="CASCADE"/>
 
     <addForeignKeyConstraint
       baseTableName="template_fields"

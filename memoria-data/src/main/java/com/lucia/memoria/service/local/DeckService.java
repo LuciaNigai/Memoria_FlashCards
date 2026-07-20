@@ -10,9 +10,7 @@ import com.lucia.memoria.model.Deck;
 import com.lucia.memoria.model.User;
 import com.lucia.memoria.repository.CardRepository;
 import com.lucia.memoria.repository.DeckRepository;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
+import com.lucia.memoria.repository.UserRepository;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,12 +37,12 @@ public class DeckService {
 
   private final DeckRepository deckRepository;
   private final CardRepository cardRepository;
-  private final UserService userService;
+  private final UserRepository userRepository;
   private final DeckMapper deckMapper;
 
   @Transactional
   public DeckResponseDTO createDeck(DeckRequestDTO dto) {
-    User user = userService.getUserEntityById(dto.getUserId());
+    User user = findUserOrThrow(dto.getUserId());
     String dtoName = validateAndTrimName(dto.getName());
 
     //  Handle Parent & Path Logic
@@ -77,7 +75,7 @@ public class DeckService {
 
   @Transactional(readOnly = true)
   public List<DeckResponseDTO> getDecksByUserId(UUID userId) {
-    User user = userService.getUserEntityById(userId);
+    User user = findUserOrThrow(userId);
     List<Deck> allDecks = deckRepository.findAllByUser(user);
 
     // Convert all to DTOs first and map by path
@@ -147,6 +145,11 @@ public class DeckService {
     return deckMapper.toDTO(deck);
   }
 
+  private User findUserOrThrow(UUID userId) {
+    return userRepository.findByUserId(userId)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+  }
+
   private String validateAndTrimName(String name) {
     if (StringUtils.isBlank(name)) {
       throw new IllegalArgumentException("Deck name cannot be empty");
@@ -181,5 +184,9 @@ public class DeckService {
   Deck findDeckOrThrow(UUID deckId) {
     return deckRepository.findByDeckId(deckId)
         .orElseThrow(() -> new NotFoundException("Deck not found."));
+  }
+
+  public Deck getDeckByName(String deckName) {
+    return deckRepository.findByName(deckName).orElse(null);
   }
 }

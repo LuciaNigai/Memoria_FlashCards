@@ -3,6 +3,7 @@ package com.lucia.memoria.controller;
 import com.lucia.memoria.dto.local.CardRequestDTO;
 import com.lucia.memoria.service.external.FreeDictionaryCardService;
 import com.lucia.memoria.service.external.GoogleAPIService;
+import com.lucia.memoria.service.local.TemplateService;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;

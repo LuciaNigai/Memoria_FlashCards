@@ -5,10 +5,6 @@ import com.lucia.memoria.dto.local.TemplateRequestDTO;
 import com.lucia.memoria.dto.local.TemplateResponseDTO;
 import com.lucia.memoria.exception.ConflictWithDataException;
 import com.lucia.memoria.exception.NotFoundException;
-import com.lucia.memoria.helper.FieldRole;
-import com.lucia.memoria.helper.FieldType;
-import com.lucia.memoria.helper.TemplateFieldType;
-import com.lucia.memoria.mapper.CardMapper;
 import com.lucia.memoria.mapper.TemplateFieldMapper;
 import com.lucia.memoria.mapper.TemplateMapper;
 import com.lucia.memoria.model.Template;
@@ -16,6 +12,7 @@ import com.lucia.memoria.model.TemplateField;
 import com.lucia.memoria.model.User;
 import com.lucia.memoria.repository.CardRepository;
 import com.lucia.memoria.repository.TemplateRepository;
+import com.lucia.memoria.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,21 +25,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class TemplateService {
 
-  private static final List<String> PARTS_OF_SPEECH = List.of(
-      "noun", "pronoun", "verb", "adjective", "adverb", "preposition", "conjunction", "interjection"
-  );
-  private static final String PART_OF_SPEECH = "Part of Speech";
-
   private final TemplateRepository templateRepository;
-  private final UserService userService;
+  private final UserRepository userRepository;
   private final CardRepository cardRepository;
   private final TemplateFieldMapper templateFieldMapper;
   private final TemplateMapper templateMapper;
-  private final CardMapper cardMapper;
 
   @Transactional(propagation = Propagation.REQUIRED)
   public TemplateResponseDTO createTemplate(TemplateRequestDTO templateRequestDTO) {
-    User owner = userService.getUserEntityById(templateRequestDTO.getOwnerId());
+    User owner = findUserOrThrow(templateRequestDTO.getOwnerId());
 
     Optional<Template> templateExists = templateRepository.findByNameAndOwner(templateRequestDTO.getName(),
         owner);
@@ -59,12 +50,6 @@ public class TemplateService {
 
     for (TemplateFieldRequestDTO templateFieldResponseDTO : templateRequestDTO.getFields()) {
       addTemplateField(templateFieldResponseDTO, template);
-    }
-
-    boolean hasPOS = template.getFields().stream()
-        .anyMatch(f -> PART_OF_SPEECH.equalsIgnoreCase(f.getName()));
-    if (templateRequestDTO.isIncludesPartOfSpeech() && !hasPOS) {
-      addPartOfSpeechFieldIfNeeded(templateRequestDTO, template);
     }
 
     return templateMapper.toDTO(templateRepository.save(template));
@@ -88,7 +73,7 @@ public class TemplateService {
 
   @Transactional(readOnly = true)
   public List<TemplateResponseDTO> getTemplatesByUserId(UUID userId) {
-    User owner = userService.getUserEntityById(userId);
+    User owner = findUserOrThrow(userId);
 
     return templateMapper.toDTOList(templateRepository.findAllByOwner(owner));
   }
@@ -108,33 +93,19 @@ public class TemplateService {
     templateRepository.delete(template);
   }
 
+  private User findUserOrThrow(UUID userId) {
+    return userRepository.findByUserId(userId)
+        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+  }
+
   private boolean isTemplateInUse(UUID templateId) {
     return cardRepository.countByTemplateTemplateId(templateId) > 0;
   }
 
 
   private void addTemplateField(TemplateFieldRequestDTO templateFieldRequestDTO, Template template) {
-    TemplateFieldType templateFieldType =
-        templateFieldRequestDTO.getTemplateFieldType() == null ? new TemplateFieldType(FieldType.TEXT)
-            : templateFieldRequestDTO.getTemplateFieldType();
     TemplateField templateField = templateFieldMapper.toEntity(templateFieldRequestDTO);
     templateField.setTemplateFieldId(UUID.randomUUID());
-    templateField.setTemplateFieldType(templateFieldType);
     template.addField(templateField);
-  }
-
-  private static void addPartOfSpeechFieldIfNeeded(TemplateRequestDTO templateRequestDTO, Template template) {
-    if (templateRequestDTO.isIncludesPartOfSpeech()) {
-      TemplateField templateField = new TemplateField();
-      templateField.setTemplateFieldId(UUID.randomUUID());
-      templateField.setName(PART_OF_SPEECH);
-      templateField.setFieldRole(FieldRole.AUXILIARY);
-      templateField.setTemplateFieldType(new TemplateFieldType(
-          FieldType.ENUM,
-          PARTS_OF_SPEECH
-      ));
-      template.addField(templateField);
-      template.setIncludesPartOfSpeech(true);
-    }
   }
 }

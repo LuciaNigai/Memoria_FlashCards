@@ -19,8 +19,6 @@ import com.lucia.memoria.dto.local.FieldResponseDTO;
 import com.lucia.memoria.dto.local.TemplateFieldResponseDTO;
 import com.lucia.memoria.exception.NotFoundException;
 import com.lucia.memoria.helper.FieldRole;
-import com.lucia.memoria.helper.FieldType;
-import com.lucia.memoria.helper.TemplateFieldType;
 import com.lucia.memoria.mapper.CardMapper;
 import com.lucia.memoria.mapper.DeckWithCardsMapper;
 import com.lucia.memoria.mapper.FieldMapper;
@@ -129,7 +127,6 @@ class CardServiceTest {
     UUID templateFieldId = UUID.randomUUID();
     TemplateField tf = new TemplateField();
     tf.setTemplateFieldId(templateFieldId);
-    tf.setTemplateFieldType(new TemplateFieldType(FieldType.TEXT));
     tf.setFieldRole(FieldRole.FRONT);
     template.getFields().add(tf);
 

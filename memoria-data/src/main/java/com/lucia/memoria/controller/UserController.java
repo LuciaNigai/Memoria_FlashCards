@@ -1,10 +1,12 @@
 package com.lucia.memoria.controller;
 
+import com.lucia.memoria.dto.local.DeckRequestDTO;
 import com.lucia.memoria.dto.local.DeckResponseDTO;
 import com.lucia.memoria.dto.local.GeneralResponseDTO;
 import com.lucia.memoria.dto.local.TagResponseDTO;
 import com.lucia.memoria.dto.local.TemplateResponseDTO;
 import com.lucia.memoria.dto.local.UserDTO;
+import com.lucia.memoria.model.Deck;
 import com.lucia.memoria.service.local.DeckService;
 import com.lucia.memoria.service.local.TagService;
 import com.lucia.memoria.service.local.TemplateService;

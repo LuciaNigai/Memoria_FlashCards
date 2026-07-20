@@ -122,27 +122,6 @@ class TemplateServiceTest {
   }
 
   @Test
-  @DisplayName("Should add Part of Speech field when requested during template creation")
-  void createTemplate_withPartOfSpeech_addsField() {
-    // Arrange - Name and empty fields collection are already handled by @BeforeEach
-    templateRequestDTO.setIncludesPartOfSpeech(true);
-
-    when(userService.getUserEntityById(userId)).thenReturn(user);
-    when(templateRepository.findByNameAndOwner("Standard Vocabulary", user))
-        .thenReturn(Optional.empty());
-    when(templateRepository.save(any(Template.class))).thenAnswer(invocation -> invocation.getArgument(0));
-    when(templateMapper.toDTO(any(Template.class))).thenReturn(templateResponseDTO);
-
-    // Act
-    templateService.createTemplate(templateRequestDTO);
-
-    // Assert
-    verify(templateRepository).save(argThat(t ->
-        t.getFields().stream().anyMatch(f -> "Part of Speech".equals(f.getName()))
-    ));
-  }
-
-  @Test
   @DisplayName("Should throw IllegalArgumentException when creating a template with an existing name for the user")
   void createTemplate_duplicateName_throwsIllegalArgumentException() {
     // Arrange

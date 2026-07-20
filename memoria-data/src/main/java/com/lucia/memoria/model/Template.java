@@ -34,9 +34,6 @@ public class Template extends BaseEntity{
 
   private String name;
 
-  @Column(name = "includes_part_of_speech", nullable = false, updatable = false)
-  private Boolean includesPartOfSpeech;
-
   @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
   @OrderColumn(name = "template_fields_order")
   private List<TemplateField> fields = new ArrayList<>() {

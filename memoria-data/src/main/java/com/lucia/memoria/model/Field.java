@@ -1,8 +1,5 @@
 package com.lucia.memoria.model;
 
-import com.lucia.memoria.exception.ConflictWithDataException;
-import com.lucia.memoria.helper.FieldType;
-import com.lucia.memoria.helper.TemplateFieldType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -47,26 +44,6 @@ public class Field extends BaseEntity{
   }
 
   public void updateContent(String newContent) {
-    TemplateFieldType type = this.templateField.getTemplateFieldType();
-
-    if (type == null) {
-      throw new ConflictWithDataException("TemplateFieldType must not be null");
-    }
-
-    // 1. Handle Enum/Multi-tag logic internally
-    if (type.getFieldType() == FieldType.ENUM || type.getFieldType() == FieldType.MULTI_TAG) {
-      validateEnumOptions(newContent, type);
-    }
-
-    // 2. Set the content
     this.content = newContent;
   }
-  private void validateEnumOptions(String content, TemplateFieldType type) {
-    if (type.getOptions() == null || !type.getOptions().contains(content)) {
-      throw new ConflictWithDataException(
-          "Invalid option. Choose one of: " + type.getOptions()
-      );
-    }
-  }
-
 }

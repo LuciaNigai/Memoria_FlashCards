@@ -1,7 +1,6 @@
 package com.lucia.memoria.dto.local;
 
 import com.lucia.memoria.helper.FieldRole;
-import com.lucia.memoria.helper.TemplateFieldType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
@@ -21,5 +20,4 @@ public class TemplateFieldRequestDTO {
   private String name;
   @NotNull(message = "fieldRole should be present")
   private FieldRole fieldRole;
-  private TemplateFieldType templateFieldType;
 }

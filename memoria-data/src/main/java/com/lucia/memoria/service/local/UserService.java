@@ -1,7 +1,11 @@
 package com.lucia.memoria.service.local;
 
+import com.lucia.memoria.dto.local.DeckRequestDTO;
+import com.lucia.memoria.dto.local.TemplateFieldRequestDTO;
+import com.lucia.memoria.dto.local.TemplateRequestDTO;
 import com.lucia.memoria.dto.local.UserDTO;
 import com.lucia.memoria.exception.ConflictWithDataException;
+import com.lucia.memoria.helper.FieldRole;
 import com.lucia.memoria.mapper.UserMapper;
 import com.lucia.memoria.model.User;
 import com.lucia.memoria.repository.DeckRepository;
@@ -19,14 +23,23 @@ public class UserService {
   private final UserRepository userRepository;
   private final DeckRepository deckRepository;
   private final UserMapper userMapper;
+  private final DeckService deckService;
+  private final TemplateService templateService;
 
   @Transactional
   public UserDTO createUser(UserDTO userDTO) {
     User user = userMapper.toEntity(userDTO);
     user.setUserId(UUID.randomUUID());
 
-    User saved = userRepository.save(user);
-    return userMapper.toDTO(saved);
+    User savedUser = userRepository.save(user);
+
+    // 1. Create Default Deck
+    createDefaultDeck(savedUser.getUserId());
+
+    // 2. Create Default Template with 4 fields
+    createDefaultTemplate(savedUser.getUserId());
+
+    return userMapper.toDTO(savedUser);
   }
 
   @Transactional(readOnly = true)
@@ -59,5 +72,35 @@ public class UserService {
     }
 
     userRepository.delete(user);
+  }
+
+  private void createDefaultDeck(UUID userId) {
+    DeckRequestDTO defaultDeckDTO = new DeckRequestDTO();
+    defaultDeckDTO.setName("Default");
+    defaultDeckDTO.setUserId(userId);
+    defaultDeckDTO.setPath(null);
+
+    deckService.createDeck(defaultDeckDTO);
+  }
+
+  private void createDefaultTemplate(UUID ownerId) {
+    TemplateFieldRequestDTO wordField = new TemplateFieldRequestDTO(null, "word", FieldRole.FRONT);
+    TemplateFieldRequestDTO transcriptionField = new TemplateFieldRequestDTO(null, "transcription", FieldRole.FRONT);
+    TemplateFieldRequestDTO posField = new TemplateFieldRequestDTO(null, "partOfSpeech", FieldRole.AUXILIARY);
+    TemplateFieldRequestDTO definitionField = new TemplateFieldRequestDTO(null, "definition", FieldRole.BACK);
+    TemplateFieldRequestDTO exampleField = new TemplateFieldRequestDTO(null, "example", FieldRole.AUXILIARY);
+
+    TemplateRequestDTO defaultTemplateDTO = new TemplateRequestDTO();
+    defaultTemplateDTO.setName("Default");
+    defaultTemplateDTO.setOwnerId(ownerId);
+    defaultTemplateDTO.setFields(List.of(
+        wordField,
+        transcriptionField,
+        posField,
+        definitionField,
+        exampleField
+    ));
+
+    templateService.createTemplate(defaultTemplateDTO);
   }
 }

@@ -18,7 +18,6 @@ public class TemplateResponseDTO {
   private UUID ownerId;
   private String name;
   private List<TemplateFieldResponseDTO> fields;
-  private boolean includesPartOfSpeech;
   private OffsetDateTime createdAt;
   private OffsetDateTime updatedAt;
 }

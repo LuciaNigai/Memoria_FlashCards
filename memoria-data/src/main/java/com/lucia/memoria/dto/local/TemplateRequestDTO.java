@@ -22,5 +22,4 @@ public class TemplateRequestDTO {
   @NotNull(message = "template fields list cannot be null")
   @Size(min = 2, message = "Template should have at least two fields")
   private List<TemplateFieldRequestDTO> fields;
-  private boolean includesPartOfSpeech;
 }
